@@ -80,25 +80,23 @@
       }
     });
 
-    socket.on('chat message',  (msg) => {
+    const appendNewMessage = msgText =>{
       const item = document.createElement('li');
-      item.textContent = msg;
+      item.textContent = msgText;
       messages.appendChild(item);
       window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    socket.on('chat message',  (msg) => {
+      appendNewMessage(msg)
     });
 
     socket.on('user connected', ()=>{
-      const item = document.createElement('li');
-      item.textContent = 'A user has connected';
-      messages.appendChild(item);
-      window.scrollTo(0, document.body.scrollHeight);
+      appendNewMessage('A user has connected')
     })
 
     socket.on('user disconnected', ()=>{
-      const item = document.createElement('li');
-      item.textContent = 'A user has disconnected';
-      messages.appendChild(item);
-      window.scrollTo(0, document.body.scrollHeight);
+      appendNewMessage('A user has disconnected')
     })
   </script>
 </body>
