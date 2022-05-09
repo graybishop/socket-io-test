@@ -18,6 +18,7 @@ app.get('/', (req, res) => {
 io.on('connection', (socket) => {
   socket.broadcast.emit('user connected')
   socket.on('disconnect', () => {
+    socket.broadcast.emit('user disconnected')
     console.log('user disconnected');
   });
   socket.on('chat message', (msg) => {

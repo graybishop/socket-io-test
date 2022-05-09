@@ -93,6 +93,13 @@
       messages.appendChild(item);
       window.scrollTo(0, document.body.scrollHeight);
     })
+
+    socket.on('user disconnected', ()=>{
+      const item = document.createElement('li');
+      item.textContent = 'A user has disconnected';
+      messages.appendChild(item);
+      window.scrollTo(0, document.body.scrollHeight);
+    })
   </script>
 </body>
 
