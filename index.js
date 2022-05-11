@@ -1,5 +1,6 @@
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import path from 'path'
 import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
@@ -22,6 +23,7 @@ app.use(connectLivereload())
 //tracks number of live users
 let userCount = 0
 
+app.use(express.static(path.join(__dirname, 'public')));
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
 });
