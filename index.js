@@ -11,14 +11,19 @@ const io = new Server(server);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+//tracks number of live users
+let userCount = 0
+
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
 });
 
 io.on('connection', (socket) => {
-  socket.broadcast.emit('user connected')
+  userCount++
+  socket.broadcast.emit('user connected', userCount)
   socket.on('disconnect', () => {
-    socket.broadcast.emit('user disconnected')
+    userCount--
+    socket.broadcast.emit('user disconnected', userCount)
     console.log('user disconnected');
   });
   socket.on('chat message', (msg) => {

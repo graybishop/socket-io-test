@@ -91,12 +91,12 @@
       appendNewMessage(msg)
     });
 
-    socket.on('user connected', ()=>{
-      appendNewMessage('A user has connected')
+    socket.on('user connected', (userCount)=>{
+      appendNewMessage(`A user has connected. Current User Count: ${userCount}`)
     })
 
-    socket.on('user disconnected', ()=>{
-      appendNewMessage('A user has disconnected')
+    socket.on('user disconnected', (userCount)=>{
+      appendNewMessage(`A user has disconnected. Current User Count: ${userCount}`)
     })
   </script>
 </body>
