@@ -1,15 +1,23 @@
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import express from 'express';
-const app = express();
 import { createServer } from 'http';
-const server = createServer(app);
 import { Server } from 'socket.io';
+import livereload from 'livereload'
+import connectLivereload from 'connect-livereload';
+
+const app = express();
+const server = createServer(app);
 const io = new Server(server);
 
 // workaround for __dirname in ESM modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+const liveReloadServer = livereload.createServer()
+liveReloadServer.watch(__dirname)
+
+app.use(connectLivereload())
 
 //tracks number of live users
 let userCount = 0
