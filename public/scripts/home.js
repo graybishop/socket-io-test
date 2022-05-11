@@ -10,6 +10,21 @@ const appendNewMessage = msgText => {
   window.scrollTo(0, document.body.scrollHeight);
 };
 
+const formatUserList = (userListArray) =>{
+  if (userListArray.length === 0) {
+    return
+  }
+  let formattedString = ''
+  userListArray.forEach((user, index) => {
+    if (index != userListArray.length -1) {
+      formattedString = formattedString + `${user}, `
+    } else {
+      formattedString = formattedString + `and ${user}.`
+    }
+  });
+  return formattedString
+}
+
 let nickname = ''
 if (!nickname){
   appendNewMessage('Please enter your nickname below 📜.')
@@ -38,8 +53,8 @@ socket.on('chat message', (msg, nickname) => {
 });
 
 socket.on('user connected', (userCount, users) => {
-  appendNewMessage(`A user has connected. Current User Count: ${userCount}`);
   console.log(users)
+  appendNewMessage(`A user has connected. Current User Count: ${userCount}. Users: ${formatUserList(users)}`);
 });
 
 socket.on('user disconnected', (userCount) => {
