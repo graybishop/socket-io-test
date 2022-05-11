@@ -22,15 +22,14 @@ app.use(connectLivereload())
 
 //tracks number of live users
 let userCount = 0
+let users = []
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
 });
 
-io.on('connection', (socket) => {
-  userCount++
-  socket.broadcast.emit('user connected', userCount)
+io.on('connection', (socket) => { 
   socket.on('disconnect', () => {
     userCount--
     socket.broadcast.emit('user disconnected', userCount)
@@ -39,6 +38,11 @@ io.on('connection', (socket) => {
   socket.on('chat message', (msg, nickname) => {
     io.emit('chat message', msg, nickname);
   });
+  socket.on('user created', (nickname)=>{
+    users.push(nickname)
+    userCount++
+    socket.broadcast.emit('user connected', userCount, users)
+  })
 });
 
 server.listen(3000, () => {

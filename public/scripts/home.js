@@ -22,6 +22,7 @@ form.addEventListener('submit', (e) => {
   if(input.value && !nickname){
     nickname = input.value
     appendNewMessage(`Welcome to the chat ${nickname}.`)
+    socket.emit('user created', nickname)
     button.textContent = 'Send'
     input.value = '';
   }
@@ -36,8 +37,9 @@ socket.on('chat message', (msg, nickname) => {
   appendNewMessage(`${nickname}: ${msg}`);
 });
 
-socket.on('user connected', (userCount) => {
+socket.on('user connected', (userCount, users) => {
   appendNewMessage(`A user has connected. Current User Count: ${userCount}`);
+  console.log(users)
 });
 
 socket.on('user disconnected', (userCount) => {
