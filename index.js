@@ -35,11 +35,11 @@ io.on('connection', (socket) => {
     socket.broadcast.emit('user disconnected', userCount)
     console.log('user disconnected');
   });
-  socket.on('chat message', (msg, nickname) => {
-    io.emit('chat message', msg, nickname);
+  socket.on('chat message', (msg, {nickname, userColor}) => {
+    io.emit('chat message', msg, {nickname, userColor});
   });
-  socket.on('user created', (nickname)=>{
-    users.push(nickname)
+  socket.on('user created', (user)=>{
+    users.push(user)
     userCount++
     socket.broadcast.emit('user connected', userCount, users)
   })
