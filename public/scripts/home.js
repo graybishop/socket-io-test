@@ -1,14 +1,6 @@
-let socket = io();
+const socket = io();
 const form = document.getElementById('form');
 const input = document.getElementById('input');
-
-form.addEventListener('submit', (e) => {
-  e.preventDefault();
-  if (input.value) {
-    socket.emit('chat message', input.value);
-    input.value = '';
-  }
-});
 
 const appendNewMessage = msgText => {
   const item = document.createElement('li');
@@ -17,8 +9,28 @@ const appendNewMessage = msgText => {
   window.scrollTo(0, document.body.scrollHeight);
 };
 
-socket.on('chat message', (msg) => {
-  appendNewMessage(msg);
+let nickname = ''
+if (!nickname){
+  appendNewMessage('Please enter your nickname below 📜.')
+}
+
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+
+  if(input.value && !nickname){
+    nickname = input.value
+    appendNewMessage(`Welcome to the chat ${nickname}.`)
+    input.value = '';
+  }
+
+  if (input.value && nickname) {
+    socket.emit('chat message', input.value, nickname);
+    input.value = '';
+  }
+});
+
+socket.on('chat message', (msg, nickname) => {
+  appendNewMessage(`${nickname}: ${msg}`);
 });
 
 socket.on('user connected', (userCount) => {
