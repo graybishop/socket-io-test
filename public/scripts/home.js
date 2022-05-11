@@ -53,7 +53,6 @@ socket.on('chat message', (msg, nickname) => {
 });
 
 socket.on('user connected', (userCount, users) => {
-  console.log(users);
   appendNewMessage(`A user has connected. Current User Count: ${userCount}. Users: ${formatUserList(users)}`);
 });
 
