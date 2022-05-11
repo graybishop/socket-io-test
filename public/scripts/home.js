@@ -10,35 +10,35 @@ const appendNewMessage = msgText => {
   window.scrollTo(0, document.body.scrollHeight);
 };
 
-const formatUserList = (userListArray) =>{
+const formatUserList = (userListArray) => {
   if (userListArray.length === 0) {
-    return
+    return;
   }
-  let formattedString = ''
+  let formattedString = '';
   userListArray.forEach((user, index) => {
-    if (index != userListArray.length -1) {
+    //Add commas between each nickname, on last entry add an 'and' before the user
+    index != userListArray.length - 1 ?
       formattedString = formattedString + `${user}, `
-    } else {
-      formattedString = formattedString + `and ${user}.`
-    }
+      :
+      formattedString = formattedString + `and ${user}.`;
   });
-  return formattedString
-}
+  return formattedString;
+};
 
-let nickname = ''
-if (!nickname){
-  appendNewMessage('Please enter your nickname below 📜.')
-  button.textContent = 'Submit Nickname'
+let nickname = '';
+if (!nickname) {
+  appendNewMessage('Please enter your nickname below 📜.');
+  button.textContent = 'Submit Nickname';
 }
 
 form.addEventListener('submit', (e) => {
   e.preventDefault();
 
-  if(input.value && !nickname){
-    nickname = input.value
-    appendNewMessage(`Welcome to the chat ${nickname}.`)
-    socket.emit('user created', nickname)
-    button.textContent = 'Send'
+  if (input.value && !nickname) {
+    nickname = input.value;
+    appendNewMessage(`Welcome to the chat ${nickname}.`);
+    socket.emit('user created', nickname);
+    button.textContent = 'Send';
     input.value = '';
   }
 
@@ -53,7 +53,7 @@ socket.on('chat message', (msg, nickname) => {
 });
 
 socket.on('user connected', (userCount, users) => {
-  console.log(users)
+  console.log(users);
   appendNewMessage(`A user has connected. Current User Count: ${userCount}. Users: ${formatUserList(users)}`);
 });
 
