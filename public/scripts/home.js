@@ -11,6 +11,22 @@ const appendNewMessage = (msgText, msgColor) => {
   }
   messages.appendChild(item);
   window.scrollTo(0, document.body.scrollHeight);
+}
+
+const appendUserList = (userCount, users) => {
+  const item = document.createElement('li');
+  item.textContent = `A user has connected. Current User Count: ${userCount}. Users: `;
+  messages.appendChild(item);
+  users.forEach(({nickname, userColor}, index) => {
+    const span = document.createElement('span')
+    span.style.color = userColor
+    index != users.length - 1 ?
+      span.textContent = `${nickname}, `
+      :
+      span.textContent = `and ${nickname}.`;
+      item.appendChild(span)
+  });
+  window.scrollTo(0, document.body.scrollHeight);
 };
 
 const formatUserList = (userListArray) => {
@@ -18,10 +34,10 @@ const formatUserList = (userListArray) => {
     return;
   }
   let formattedString = '';
-  userListArray.forEach(({nickname}, index) => {
+  userListArray.forEach(({nickname, userColor}, index) => {
     //Add commas between each nickname, on last entry add an 'and' before the user
     index != userListArray.length - 1 ?
-      formattedString = formattedString + `${nickname}, `
+      formattedString = formattedString + `<span style='color:${userColor}'>${nickname},</span>`
       :
       formattedString = formattedString + `and ${nickname}.`;
   });
@@ -66,7 +82,7 @@ socket.on('chat message', (msg, {nickname, userColor}) => {
 });
 
 socket.on('user connected', (userCount, users) => {
-  appendNewMessage(`A user has connected. Current User Count: ${userCount}. Users: ${formatUserList(users)}`);
+  appendUserList(userCount, users)
 });
 
 socket.on('user disconnected', (userCount) => {
