@@ -18,12 +18,12 @@ const formatUserList = (userListArray) => {
     return;
   }
   let formattedString = '';
-  userListArray.forEach((user, index) => {
+  userListArray.forEach(({nickname}, index) => {
     //Add commas between each nickname, on last entry add an 'and' before the user
     index != userListArray.length - 1 ?
-      formattedString = formattedString + `${user}, `
+      formattedString = formattedString + `${nickname}, `
       :
-      formattedString = formattedString + `and ${user}.`;
+      formattedString = formattedString + `and ${nickname}.`;
   });
   return formattedString;
 };
