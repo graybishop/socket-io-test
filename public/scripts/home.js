@@ -1,6 +1,7 @@
 const socket = io();
 const form = document.getElementById('form');
 const input = document.getElementById('input');
+const button = document.getElementById('submitButton');
 
 const appendNewMessage = msgText => {
   const item = document.createElement('li');
@@ -12,6 +13,7 @@ const appendNewMessage = msgText => {
 let nickname = ''
 if (!nickname){
   appendNewMessage('Please enter your nickname below 📜.')
+  button.textContent = 'Submit Nickname'
 }
 
 form.addEventListener('submit', (e) => {
@@ -20,6 +22,7 @@ form.addEventListener('submit', (e) => {
   if(input.value && !nickname){
     nickname = input.value
     appendNewMessage(`Welcome to the chat ${nickname}.`)
+    button.textContent = 'Send'
     input.value = '';
   }
 
