@@ -28,7 +28,7 @@ const appendUserList = (users) => {
     index != users.length - 1 ?
       span.textContent = `${nickname}, `
       :
-      span.innerHTML = `<span style='font-weight:normal; color:initial'>and</span> ${nickname}.`;
+      span.innerHTML = `<span style='font-weight:normal; color:white'>and</span> ${nickname}.`;
     item.appendChild(span);
   });
   window.scrollTo(0, document.body.scrollHeight);
@@ -82,5 +82,5 @@ socket.on('user connected', (users) => {
 });
 
 socket.on('user disconnected', (user) => {
-  appendNewMessage(`<span style ='font-weight:bold'>${user.nickname}</span><span style='color:initial'> has disconnected.</span>`, user.userColor, true);
+  appendNewMessage(`<span style ='font-weight:bold'>${user.nickname}</span><span style='color:white'> has disconnected.</span>`, user.userColor, true);
 });

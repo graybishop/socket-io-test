@@ -2,6 +2,9 @@ body {
   margin: 0;
   padding-bottom: 3rem;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: rgb(22, 22, 22);
+  color: white;
+
 }
 
 #form {
@@ -50,5 +53,5 @@ body {
 }
 
 #messages>li:nth-child(odd) {
-  background: #efefef;
+  background: #0f0f0f;
 }
