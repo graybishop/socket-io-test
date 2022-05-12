@@ -21,16 +21,25 @@ const appendUserList = (users) => {
   const item = document.createElement('li');
   item.textContent = `A user has connected. Current User Count: ${users.length}. Users: `;
   messages.appendChild(item);
-  users.forEach(({ nickname, userColor }, index) => {
+  if (users.length > 1) {
+    users.forEach(({ nickname, userColor }, index) => {
+      const span = document.createElement('span');
+      span.style.color = userColor;
+      span.style.fontWeight = 'bold';
+      index != users.length - 1 ?
+        span.textContent = `${nickname}${users.length > 2 ? ',' : ''} `
+        :
+        span.innerHTML = `<span style='font-weight:normal; color:white'>and</span> ${nickname}.`;
+      item.appendChild(span);
+    });
+  } else {
     const span = document.createElement('span');
-    span.style.color = userColor;
+    span.style.color = users[0].userColor;
     span.style.fontWeight = 'bold';
-    index != users.length - 1 ?
-      span.textContent = `${nickname}, `
-      :
-      span.innerHTML = `<span style='font-weight:normal; color:white'>and</span> ${nickname}.`;
+    span.textContent = `${users[0].nickname}.`;
     item.appendChild(span);
-  });
+  }
+
   window.scrollTo(0, document.body.scrollHeight);
 };
 
