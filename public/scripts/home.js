@@ -30,21 +30,6 @@ const appendUserList = (users) => {
   window.scrollTo(0, document.body.scrollHeight);
 };
 
-const formatUserList = (userListArray) => {
-  if (userListArray.length === 0) {
-    return;
-  }
-  let formattedString = '';
-  userListArray.forEach(({ nickname, userColor }, index) => {
-    //Add commas between each nickname, on last entry add an 'and' before the user
-    index != userListArray.length - 1 ?
-      formattedString = formattedString + `<span style='color:${userColor}'>${nickname},</span>`
-      :
-      formattedString = formattedString + `and ${nickname}.`;
-  });
-  return formattedString;
-};
-
 const generateColor = () => {
   const letters = '0123456789ABCDEF'.split('');
   let color = '#';
