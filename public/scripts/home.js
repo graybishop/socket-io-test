@@ -13,9 +13,9 @@ const appendNewMessage = (msgText, msgColor) => {
   window.scrollTo(0, document.body.scrollHeight);
 };
 
-const appendUserList = (userCount, users) => {
+const appendUserList = (users) => {
   const item = document.createElement('li');
-  item.textContent = `A user has connected. Current User Count: ${userCount}. Users: `;
+  item.textContent = `A user has connected. Current User Count: ${users.length}. Users: `;
   messages.appendChild(item);
   users.forEach(({ nickname, userColor }, index) => {
     const span = document.createElement('span');
@@ -67,7 +67,13 @@ form.addEventListener('submit', (e) => {
     nickname = input.value;
     userColor = generateColor();
     appendNewMessage(`Welcome to the chat ${nickname}.`, userColor);
-    socket.emit('user created', { nickname, userColor });
+    const user = {
+      nickname,
+      userColor,
+      guid: nickname+userColor,
+      socketId: socket.id
+    }
+    socket.emit('user created', user);
     button.textContent = 'Send';
     input.value = '';
   }
@@ -82,10 +88,11 @@ socket.on('chat message', (msg, { nickname, userColor }) => {
   appendNewMessage(`${nickname}: ${msg}`, userColor);
 });
 
-socket.on('user connected', (userCount, users) => {
-  appendUserList(userCount, users);
+socket.on('user connected', (users) => {
+  appendUserList(users);
 });
 
-socket.on('user disconnected', (userCount) => {
-  appendNewMessage(`A user has disconnected. Current User Count: ${userCount}`);
+socket.on('user disconnected', (user) => {
+  console.log(user)
+  appendNewMessage(`${user.nickname} has disconnected.`, user.userColor);
 });

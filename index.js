@@ -20,8 +20,7 @@ liveReloadServer.watch(__dirname)
 
 app.use(connectLivereload())
 
-//tracks number of live users
-let userCount = 0
+//tracks  live users
 let users = []
 
 app.use(express.static(path.join(__dirname, 'public')));
@@ -31,17 +30,19 @@ app.get('/', (req, res) => {
 
 io.on('connection', (socket) => { 
   socket.on('disconnect', () => {
-    userCount--
-    socket.broadcast.emit('user disconnected', userCount)
-    console.log('user disconnected');
+    let disconnectedUserIndex = users.findIndex(({socketId})=>{
+      return socketId == socket.id
+    })
+    if(disconnectedUserIndex !== -1){
+      socket.broadcast.emit('user disconnected', users.splice(disconnectedUserIndex, 1)[0])
+    }
   });
   socket.on('chat message', (msg, {nickname, userColor}) => {
     io.emit('chat message', msg, {nickname, userColor});
   });
   socket.on('user created', (user)=>{
     users.push(user)
-    userCount++
-    socket.broadcast.emit('user connected', userCount, users)
+    socket.broadcast.emit('user connected', users)
   })
 });
 
