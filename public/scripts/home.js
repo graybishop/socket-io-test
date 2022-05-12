@@ -3,9 +3,13 @@ const form = document.getElementById('form');
 const input = document.getElementById('input');
 const button = document.getElementById('submitButton');
 
-const appendNewMessage = (msgText, msgColor) => {
+const appendNewMessage = (msgText, msgColor, formatted) => {
   const item = document.createElement('li');
-  item.textContent = msgText;
+  formatted ?
+    item.innerHTML = msgText
+    :
+    item.textContent = msgText;
+
   if (msgColor) {
     item.style.color = msgColor;
   }
@@ -55,9 +59,9 @@ form.addEventListener('submit', (e) => {
     const user = {
       nickname,
       userColor,
-      guid: nickname+userColor,
+      guid: nickname + userColor,
       socketId: socket.id
-    }
+    };
     socket.emit('user created', user);
     button.textContent = 'Send';
     input.value = '';
@@ -78,6 +82,5 @@ socket.on('user connected', (users) => {
 });
 
 socket.on('user disconnected', (user) => {
-  console.log(user)
-  appendNewMessage(`${user.nickname} has disconnected.`, user.userColor);
+  appendNewMessage(`<span style ='font-weight:bold'>${user.nickname}</span><span style='color:initial'> has disconnected.</span>`, user.userColor, true);
 });
