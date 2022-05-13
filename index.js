@@ -9,7 +9,13 @@ import connectLivereload from 'connect-livereload';
 
 const app = express();
 const server = createServer(app);
-const io = new Server(server);
+const io = new Server(server,{
+  cors: {
+    origin: 'http://localhost:3000',
+    methods: ['GET', 'POST']
+  }
+});
+const PORT = process.env.PORT || 3001;
 
 // workaround for __dirname in ESM modules
 const __filename = fileURLToPath(import.meta.url);
@@ -23,7 +29,11 @@ app.use(connectLivereload());
 //tracks  live users
 let users = [];
 
-app.use(express.static(path.join(__dirname, 'public')));
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../client/build')));
+}
+
+app.use(express.static(path.join(__dirname, 'client/src')));
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
 });
@@ -49,6 +59,6 @@ io.on('connection', (socket) => {
   });
 });
 
-server.listen(3000, () => {
-  console.log('listening on *:3000');
+server.listen(PORT, () => {
+  console.log(`listening on *:${PORT}`);
 });

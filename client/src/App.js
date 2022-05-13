@@ -1,7 +1,8 @@
 import './App.css';
 import { io } from "socket.io-client";
 import { useState } from 'react';
-const socket = io();
+const socket = io('localhost:3001');
+console.log(socket)
 
 const App = () => {
 
