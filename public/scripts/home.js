@@ -103,35 +103,59 @@ socket.on('user disconnected', (user) => {
 });
 
 let typingUsers = [];
-
-
 socket.on('user typing', user => {
+
   const updateTypingHtml = userArray =>{
-    typingUsersDiv.innerText = JSON.stringify(userArray)+ ' is typing...';
+    typingUsersDiv.innerHTML = ''
+
+    const createColoredNameSpan = (userData) =>{
+      const span = document.createElement('span')
+      span.style.color = userData.userColor
+      span.innerText = userData.nickname
+      return span
+    }
+
+    if (userArray.length === 0){
+      return
+    }
+
+    if (userArray.length === 1) {
+      typingUsersDiv.innerHTML = ''
+      typingUsersDiv.appendChild(createColoredNameSpan(userArray[0]))
+      typingUsersDiv.insertAdjacentHTML('beforeend', ' is typing...')
+      return
+    }
+
+    if (userArray.length > 1) {
+      typingUsersDiv.innerHTML = ''
+      typingUsersDiv.appendChild(createColoredNameSpan(userArray[0]))
+      typingUsersDiv.insertAdjacentHTML('beforeend', 'and others are typing...')
+    }
   }
+
+  const removeTypingUserFromArray = () =>{
+    typingUsers = typingUsers.filter(element =>{
+      element.guid != user.guid
+    })
+    updateTypingHtml(typingUsers)
+  }
+
   //if typingUsers does not contain the user we have received
   //then add the user to the typingUsers array, after setting up
   //a cooldown that removes it.
   const receivedUserIndex = typingUsers.findIndex(element =>{
     return element.guid === user.guid
   })
-  console.log(receivedUserIndex)
   if (receivedUserIndex === -1) {
     const timeoutId = setTimeout(()=>{
-      typingUsers = typingUsers.filter(element =>{
-        element.guid != user.guid
-      })
-      updateTypingHtml(typingUsers)
+      removeTypingUserFromArray()
     }, 500)
     let modifiedUser = {...user, timeoutId}
     typingUsers.push(modifiedUser);
   } else {
     clearTimeout(typingUsers[receivedUserIndex].timeoutId)
     const timeoutId = setTimeout(()=>{
-      typingUsers = typingUsers.filter(element =>{
-        element.guid != user.guid
-      })
-      updateTypingHtml(typingUsers)
+      removeTypingUserFromArray()
     }, 500)
     typingUsers[receivedUserIndex].timeoutId = timeoutId
   }
