@@ -84,7 +84,7 @@ form.addEventListener('submit', (e) => {
 });
 
 input.addEventListener('input', (e)=>{
-  if(input.value){
+  if(input.value && user.guid){
     socket.emit('user typing', user)
   }
 })
@@ -100,3 +100,7 @@ socket.on('user connected', (users) => {
 socket.on('user disconnected', (user) => {
   appendNewMessage(`<span style ='font-weight:bold'>${user.nickname}</span><span style='color:white'> has disconnected.</span>`, user.userColor, true);
 });
+
+socket.on('user typing', user =>{
+  console.log(user.nickname)
+})

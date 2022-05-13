@@ -8,9 +8,14 @@
 
 <body>
   <ul id="messages"></ul>
-  <form id="form" action="">
-    <input id="input" autocomplete="off" /><button id="submitButton">Send</button>
-  </form>
+  <div id="input-container">
+    <div id="typing-users">
+      This will display who is typing...
+    </div>
+    <form id="form" action="">
+      <input id="input" autocomplete="off" /><button id="submitButton">Send</button>
+    </form>
+  </div>
   <script src="/socket.io/socket.io.js"></script>
   <script src="http://chancejs.com/chance.min.js"></script>
   <script src="/scripts/home.js"></script>

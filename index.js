@@ -44,6 +44,9 @@ io.on('connection', (socket) => {
     users.push(user)
     socket.broadcast.emit('user connected', users)
   })
+  socket.on('user typing', (user)=>{
+    socket.broadcast.emit('user typing', user)
+  })
 });
 
 server.listen(3000, () => {
