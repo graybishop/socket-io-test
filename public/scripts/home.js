@@ -103,7 +103,12 @@ socket.on('user disconnected', (user) => {
 });
 
 let typingUsers = [];
+
+
 socket.on('user typing', user => {
+  const updateTypingHtml = userArray =>{
+    typingUsersDiv.innerText = JSON.stringify(userArray)+ ' is typing...';
+  }
   //if typingUsers does not contain the user we have received
   //then add the user to the typingUsers array, after setting up
   //a cooldown that removes it.
@@ -116,7 +121,7 @@ socket.on('user typing', user => {
       typingUsers = typingUsers.filter(element =>{
         element.guid != user.guid
       })
-      typingUsersDiv.innerText = JSON.stringify(typingUsers)+ ' is typing...';
+      updateTypingHtml(typingUsers)
     }, 500)
     let modifiedUser = {...user, timeoutId}
     typingUsers.push(modifiedUser);
@@ -126,10 +131,10 @@ socket.on('user typing', user => {
       typingUsers = typingUsers.filter(element =>{
         element.guid != user.guid
       })
-      typingUsersDiv.innerText = JSON.stringify(typingUsers)+ ' is typing...';
+      updateTypingHtml(typingUsers)
     }, 500)
     typingUsers[receivedUserIndex].timeoutId = timeoutId
   }
 
-  typingUsersDiv.innerText = JSON.stringify(typingUsers)+' is typing...';
+  updateTypingHtml(typingUsers)
 });
