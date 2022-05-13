@@ -1,8 +1,7 @@
 import './App.css';
-import { io } from "socket.io-client";
-import { useState } from 'react';
-const socket = io('localhost:3001');
-console.log(socket)
+
+import { useEffect, useState } from 'react';
+import { socket } from './socket-config.js';
 
 const App = () => {
 
@@ -16,44 +15,43 @@ const App = () => {
   const [buttonText, setButtonText] = useState('Submit Nickname');
   const [firstTime, updateFirstTime] = useState(true);
   const [value, setValue] = useState('');
+  const [typingUsers, setTypingUsers] = useState([])
 
   const input = document.getElementById('input');
   const typingUsersDiv = document.getElementById('typing-users');
-  const messages = document.getElementById('messages');
 
   const appendNewMessage = (msgText, msgColor, formatted) => {
-    let stateClone = messageList;
-    stateClone.push({
-      msgText, msgColor, formatted
+    console.log('adding message', {msgText, msgColor, formatted})
+    setMessageList((prevState)=>{
+      return [...prevState, {msgText, msgColor, formatted}]
     });
-    setMessageList(stateClone);
   };
 
-  const appendUserList = (users) => {
-    const item = document.createElement('li');
-    item.textContent = `A user has connected. Current User Count: ${users.length}. Users: `;
-    messages.appendChild(item);
-    if (users.length > 1) {
-      users.forEach(({ nickname, userColor }, index) => {
-        const span = document.createElement('span');
-        span.style.color = userColor;
-        span.style.fontWeight = 'bold';
-        index !== users.length - 1 ?
-          span.textContent = `${nickname}${users.length > 2 ? ',' : ''} `
-          :
-          span.innerHTML = `<span style='font-weight:normal; color:white'>and</span> ${nickname}.`;
-        item.appendChild(span);
-      });
-    } else {
-      const span = document.createElement('span');
-      span.style.color = users[0].userColor;
-      span.style.fontWeight = 'bold';
-      span.textContent = `${users[0].nickname}.`;
-      item.appendChild(span);
-    }
+  // const appendUserList = (users) => {
+  //   const item = document.createElement('li');
+  //   item.textContent = `A user has connected. Current User Count: ${users.length}. Users: `;
+  //   messages.appendChild(item);
+  //   if (users.length > 1) {
+  //     users.forEach(({ nickname, userColor }, index) => {
+  //       const span = document.createElement('span');
+  //       span.style.color = userColor;
+  //       span.style.fontWeight = 'bold';
+  //       index !== users.length - 1 ?
+  //         span.textContent = `${nickname}${users.length > 2 ? ',' : ''} `
+  //         :
+  //         span.innerHTML = `<span style='font-weight:normal; color:white'>and</span> ${nickname}.`;
+  //       item.appendChild(span);
+  //     });
+  //   } else {
+  //     const span = document.createElement('span');
+  //     span.style.color = users[0].userColor;
+  //     span.style.fontWeight = 'bold';
+  //     span.textContent = `${users[0].nickname}.`;
+  //     item.appendChild(span);
+  //   }
 
-    window.scrollTo(0, document.body.scrollHeight);
-  };
+  //   window.scrollTo(0, document.body.scrollHeight);
+  // };
 
   const generateColor = () => {
     const letters = '0123456789ABCDEF'.split('');
@@ -75,11 +73,13 @@ const App = () => {
       socket.emit('user created', user);
       setButtonText('Send');
       setValue('');
+      return
     }
 
     if (input.value && user.nickname) {
       socket.emit('chat message', input.value, user);
       setValue('');
+      return
     }
   };
 
@@ -90,19 +90,25 @@ const App = () => {
     }
   };
 
-  socket.on('chat message', (msg, { nickname, userColor }) => {
-    appendNewMessage(`${nickname}: ${msg}`, userColor);
-  });
+  useEffect(()=>{
+    socket.on('chat message', (msg, { nickname, userColor }) => {
+      appendNewMessage(`${nickname}: ${msg}`, userColor);
+    });
 
-  socket.on('user connected', (users) => {
-    appendUserList(users);
-  });
+    // socket.on('user connected', (users) => {
+    //   appendUserList(users);
+    // });
 
-  socket.on('user disconnected', (user) => {
-    appendNewMessage(`<span style ='font-weight:bold'>${user.nickname}</span><span style='color:white'> has disconnected.</span>`, user.userColor, true);
-  });
+    socket.on('user disconnected', (user) => {
+      appendNewMessage(`${user.nickname} has disconnected.</span>`, 'white', true);
+    });
 
-  let typingUsers = [];
+    return () =>{
+      socket.off('chat message')
+      socket.off('user disconnected')
+    }
+  }, [])
+
   socket.on('user typing', user => {
 
     const updateTypingHtml = userArray => {
@@ -135,9 +141,9 @@ const App = () => {
     };
 
     const removeTypingUserFromArray = () => {
-      typingUsers = typingUsers.filter(element => {
+      setTypingUsers(typingUsers.filter(element => {
         return element.guid !== user.guid;
-      });
+      }));
       updateTypingHtml(typingUsers);
     };
 
@@ -166,9 +172,10 @@ const App = () => {
     updateTypingHtml(typingUsers);
   });
 
+
   if (firstTime) {
-    appendNewMessage('This is your first time, please submit a nickname');
     updateFirstTime(false);
+    appendNewMessage('Please enter your nickname below 📜.');
   }
 
 
