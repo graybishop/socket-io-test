@@ -107,6 +107,7 @@ socket.on('user typing', user => {
 
   const updateTypingHtml = userArray =>{
     typingUsersDiv.innerHTML = ''
+    console.log(userArray)
 
     const createColoredNameSpan = (userData) =>{
       const span = document.createElement('span')
@@ -129,15 +130,22 @@ socket.on('user typing', user => {
     if (userArray.length > 1) {
       typingUsersDiv.innerHTML = ''
       typingUsersDiv.appendChild(createColoredNameSpan(userArray[0]))
-      typingUsersDiv.insertAdjacentHTML('beforeend', 'and others are typing...')
+      typingUsersDiv.insertAdjacentHTML('beforeend', ' and others are typing...')
+      return
     }
   }
 
   const removeTypingUserFromArray = () =>{
     typingUsers = typingUsers.filter(element =>{
-      element.guid != user.guid
+      return element.guid !== user.guid
     })
     updateTypingHtml(typingUsers)
+  }
+
+  const timeoutSetUp = () =>{
+    return setTimeout(()=>{
+      removeTypingUserFromArray()
+    }, 1250)
   }
 
   //if typingUsers does not contain the user we have received
@@ -147,16 +155,12 @@ socket.on('user typing', user => {
     return element.guid === user.guid
   })
   if (receivedUserIndex === -1) {
-    const timeoutId = setTimeout(()=>{
-      removeTypingUserFromArray()
-    }, 500)
+    const timeoutId = timeoutSetUp()
     let modifiedUser = {...user, timeoutId}
     typingUsers.push(modifiedUser);
   } else {
     clearTimeout(typingUsers[receivedUserIndex].timeoutId)
-    const timeoutId = setTimeout(()=>{
-      removeTypingUserFromArray()
-    }, 500)
+    const timeoutId = timeoutSetUp()
     typingUsers[receivedUserIndex].timeoutId = timeoutId
   }
 
