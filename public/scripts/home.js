@@ -104,9 +104,11 @@ socket.on('user disconnected', (user) => {
 
 const typingUsers =[]
 socket.on('user typing', user =>{
-  if (!typingUsers.includes(user)){
+  if (!typingUsers.some(value =>{
+    return value.guid === user.guid
+  })){
     typingUsers.push(user)
   }
   
-  typingUsersDiv.innerText = JSON.stringify(typingUsers)
+  typingUsersDiv.innerText = JSON.stringify(typingUsers[0].nickname)
 })
