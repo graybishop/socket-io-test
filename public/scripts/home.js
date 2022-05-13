@@ -2,6 +2,7 @@ const socket = io();
 const form = document.getElementById('form');
 const input = document.getElementById('input');
 const button = document.getElementById('submitButton');
+const typingUsersDiv = document.getElementById('typing-users')
 
 const user ={
   nickname: '',
@@ -101,6 +102,11 @@ socket.on('user disconnected', (user) => {
   appendNewMessage(`<span style ='font-weight:bold'>${user.nickname}</span><span style='color:white'> has disconnected.</span>`, user.userColor, true);
 });
 
+const typingUsers =[]
 socket.on('user typing', user =>{
-  console.log(user.nickname)
+  if (!typingUsers.includes(user)){
+    typingUsers.push(user)
+  }
+  
+  typingUsersDiv.innerText = JSON.stringify(typingUsers)
 })
