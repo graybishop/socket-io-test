@@ -2,14 +2,14 @@ const socket = io();
 const form = document.getElementById('form');
 const input = document.getElementById('input');
 const button = document.getElementById('submitButton');
-const typingUsersDiv = document.getElementById('typing-users')
+const typingUsersDiv = document.getElementById('typing-users');
 
-const user ={
+const user = {
   nickname: '',
   userColor: '',
   guid: '',
   socketId: socket.id
-}
+};
 
 const appendNewMessage = (msgText, msgColor, formatted) => {
   const item = document.createElement('li');
@@ -71,7 +71,7 @@ form.addEventListener('submit', (e) => {
   if (input.value && !user.nickname) {
     user.nickname = input.value;
     user.userColor = generateColor();
-    user.guid = user.nickname + user.userColor
+    user.guid = user.nickname + user.userColor;
     appendNewMessage(`Welcome to the chat ${user.nickname}.`, user.userColor);
     socket.emit('user created', user);
     button.textContent = 'Send';
@@ -79,16 +79,16 @@ form.addEventListener('submit', (e) => {
   }
 
   if (input.value && user.nickname) {
-    socket.emit('chat message', input.value,  user);
+    socket.emit('chat message', input.value, user);
     input.value = '';
   }
 });
 
-input.addEventListener('input', (e)=>{
-  if(input.value && user.guid){
-    socket.emit('user typing', user)
+input.addEventListener('input', (e) => {
+  if (input.value && user.guid) {
+    socket.emit('user typing', user);
   }
-})
+});
 
 socket.on('chat message', (msg, { nickname, userColor }) => {
   appendNewMessage(`${nickname}: ${msg}`, userColor);
@@ -102,13 +102,13 @@ socket.on('user disconnected', (user) => {
   appendNewMessage(`<span style ='font-weight:bold'>${user.nickname}</span><span style='color:white'> has disconnected.</span>`, user.userColor, true);
 });
 
-const typingUsers =[]
-socket.on('user typing', user =>{
-  if (!typingUsers.some(value =>{
-    return value.guid === user.guid
-  })){
-    typingUsers.push(user)
+const typingUsers = [];
+socket.on('user typing', user => {
+  if (!typingUsers.some(value => {
+    return value.guid === user.guid;
+  })) {
+    typingUsers.push(user);
   }
-  
-  typingUsersDiv.innerText = JSON.stringify(typingUsers[0].nickname)
-})
+
+  typingUsersDiv.innerText = JSON.stringify(typingUsers[0].nickname);
+});
