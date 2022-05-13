@@ -3,6 +3,13 @@ const form = document.getElementById('form');
 const input = document.getElementById('input');
 const button = document.getElementById('submitButton');
 
+const user ={
+  nickname: '',
+  userColor: '',
+  guid: '',
+  socketId: socket.id
+}
+
 const appendNewMessage = (msgText, msgColor, formatted) => {
   const item = document.createElement('li');
   formatted ?
@@ -52,8 +59,7 @@ const generateColor = () => {
   return color;
 };
 
-let nickname = '';
-if (!nickname) {
+if (!user.nickname) {
   appendNewMessage('Please enter your nickname below 📜.');
   button.textContent = 'Submit Nickname';
 }
@@ -61,26 +67,27 @@ if (!nickname) {
 form.addEventListener('submit', (e) => {
   e.preventDefault();
 
-  if (input.value && !nickname) {
-    nickname = input.value;
-    userColor = generateColor();
-    appendNewMessage(`Welcome to the chat ${nickname}.`, userColor);
-    const user = {
-      nickname,
-      userColor,
-      guid: nickname + userColor,
-      socketId: socket.id
-    };
+  if (input.value && !user.nickname) {
+    user.nickname = input.value;
+    user.userColor = generateColor();
+    user.guid = user.nickname + user.userColor
+    appendNewMessage(`Welcome to the chat ${user.nickname}.`, user.userColor);
     socket.emit('user created', user);
     button.textContent = 'Send';
     input.value = '';
   }
 
-  if (input.value && nickname) {
-    socket.emit('chat message', input.value, { nickname, userColor });
+  if (input.value && user.nickname) {
+    socket.emit('chat message', input.value,  user);
     input.value = '';
   }
 });
+
+input.addEventListener('input', (e)=>{
+  if(input.value){
+    socket.emit('user typing', user)
+  }
+})
 
 socket.on('chat message', (msg, { nickname, userColor }) => {
   appendNewMessage(`${nickname}: ${msg}`, userColor);
