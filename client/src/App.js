@@ -1,36 +1,32 @@
 import './App.css';
 import { io } from "socket.io-client";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 const socket = io();
 
 const App = () => {
 
-  const [messageList, updateMessageList] = useState([]);
-  const [user, updateUser] = useState({
+  const [messageList, setMessageList] = useState([]);
+  const [user, setUser] = useState({
     nickname: '',
     userColor: '',
     guid: '',
     socketId: socket.id
   });
-  const [buttonText, UpdateButtonText] = useState('Send');
+  const [buttonText, setButtonText] = useState('Submit Nickname');
+  const [firstTime, updateFirstTime] = useState(true)
+  const [value, setValue] = useState('')
 
-  const form = document.getElementById('form');
   const input = document.getElementById('input');
   const button = document.getElementById('submitButton');
   const typingUsersDiv = document.getElementById('typing-users');
   const messages = document.getElementById('messages');
 
   const appendNewMessage = (msgText, msgColor, formatted) => {
-    const item = document.createElement('li');
-    formatted ?
-      item.innerHTML = msgText
-      :
-      item.textContent = msgText;
-
-    if (msgColor) {
-      item.style.color = msgColor;
-    }
-    messageList.push(item);
+    let stateClone = messageList;
+    stateClone.push({
+      msgText, msgColor, formatted
+    });
+    setMessageList(stateClone);
   };
 
   const appendUserList = (users) => {
@@ -42,7 +38,7 @@ const App = () => {
         const span = document.createElement('span');
         span.style.color = userColor;
         span.style.fontWeight = 'bold';
-        index != users.length - 1 ?
+        index !== users.length - 1 ?
           span.textContent = `${nickname}${users.length > 2 ? ',' : ''} `
           :
           span.innerHTML = `<span style='font-weight:normal; color:white'>and</span> ${nickname}.`;
@@ -68,11 +64,6 @@ const App = () => {
     return color;
   };
 
-  if (!user.nickname) {
-    appendNewMessage('Please enter your nickname below 📜.');
-    UpdateButtonText('Submit Nickname');
-  }
-
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -92,11 +83,12 @@ const App = () => {
     }
   };
 
-  input.addEventListener('input', (e) => {
-    if (input.value && user.guid) {
+  const handleInput = (e) => {
+    setValue(e.target.value)
+    if (value && user.guid) {
       socket.emit('user typing', user);
     }
-  });
+  };
 
   socket.on('chat message', (msg, { nickname, userColor }) => {
     appendNewMessage(`${nickname}: ${msg}`, userColor);
@@ -115,7 +107,6 @@ const App = () => {
 
     const updateTypingHtml = userArray => {
       typingUsersDiv.innerHTML = '';
-      console.log(userArray);
 
       const createColoredNameSpan = (userData) => {
         const span = document.createElement('span');
@@ -175,40 +166,47 @@ const App = () => {
     updateTypingHtml(typingUsers);
   });
 
+  if (firstTime){
+    appendNewMessage('This is your first time, please submit a nickname')
+    updateFirstTime(false)
+  }
+
+
 
   return (
     <div className='body'>
-      <MessageList messageList />
+      <MessageList messageList={messageList} />
       <div id="input-container">
         <div id="typing-users">
           This will display who is typing...
         </div>
         <form onSubmit={handleSubmit} id="form" action="">
-          <input id="input" autoComplete="off" /><SubmitButton buttonText />
+          <input onInput={handleInput} id='input' value={value} autoComplete="off" /><SubmitButton buttonText={buttonText} />
         </form>
       </div>
       <script src="/socket.io/socket.io.js"></script>
-      <script src="http://chancejs.com/chance.min.js"></script>
     </div>
   );
 
 };
 
 const MessageList = (props) => {
+  const messages = props.messageList.map((element, index) => {
+    return (
+      <Message msgText={element.msgText} msgColor={element.msgColor} formatted={element.formatted} key={index} />
+    );
+  });
+
   return (
-    <ul>
-      {props.messageList.map((element => {
-        return (
-          <Message msgText={element.msgText} msgColor={element.msgColor} formatted={element.formatted} />
-        );
-      }))}
+    <ul className='messages'>
+      {messages}
     </ul>
   );
 };
 
 const Message = ({ msgText, msgColor, formatted }) => {
   return (
-    <li style={{ color: msgColor }}>
+    <li style={{ color: msgColor }} >
       {msgText}
     </li>
   );

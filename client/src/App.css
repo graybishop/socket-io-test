@@ -50,7 +50,7 @@
   color: #fff;
 }
 
-#messages {
+.messages {
   list-style-type: none;
   margin: 0;
   padding: 0;
@@ -58,10 +58,10 @@
   scroll-behavior: smooth;
 }
 
-#messages>li {
+.messages>li {
   padding: 0.5rem 1rem;
 }
 
-#messages>li:nth-child(odd) {
+.messages>li:nth-child(odd) {
   background: #0f0f0f;
 }
