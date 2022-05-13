@@ -22,7 +22,8 @@ const appendNewMessage = (msgText, msgColor, formatted) => {
     item.style.color = msgColor;
   }
   messages.appendChild(item);
-  window.scrollTo(0, document.body.scrollHeight);
+  // window.scrollTo(0, document.body.scrollHeight);
+  item.scrollIntoView()
 };
 
 const appendUserList = (users) => {
