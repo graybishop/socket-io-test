@@ -22,7 +22,6 @@ const appendNewMessage = (msgText, msgColor, formatted) => {
     item.style.color = msgColor;
   }
   messages.appendChild(item);
-  // window.scrollTo(0, document.body.scrollHeight);
   item.scrollIntoView()
 };
 
@@ -103,13 +102,34 @@ socket.on('user disconnected', (user) => {
   appendNewMessage(`<span style ='font-weight:bold'>${user.nickname}</span><span style='color:white'> has disconnected.</span>`, user.userColor, true);
 });
 
-const typingUsers = [];
+let typingUsers = [];
 socket.on('user typing', user => {
-  if (!typingUsers.some(value => {
-    return value.guid === user.guid;
-  })) {
-    typingUsers.push(user);
+  //if typingUsers does not contain the user we have received
+  //then add the user to the typingUsers array, after setting up
+  //a cooldown that removes it.
+  const receivedUserIndex = typingUsers.findIndex(element =>{
+    return element.guid === user.guid
+  })
+  console.log(receivedUserIndex)
+  if (receivedUserIndex === -1) {
+    const timeoutId = setTimeout(()=>{
+      typingUsers = typingUsers.filter(element =>{
+        element.guid != user.guid
+      })
+      typingUsersDiv.innerText = JSON.stringify(typingUsers)+ ' is typing...';
+    }, 500)
+    let modifiedUser = {...user, timeoutId}
+    typingUsers.push(modifiedUser);
+  } else {
+    clearTimeout(typingUsers[receivedUserIndex].timeoutId)
+    const timeoutId = setTimeout(()=>{
+      typingUsers = typingUsers.filter(element =>{
+        element.guid != user.guid
+      })
+      typingUsersDiv.innerText = JSON.stringify(typingUsers)+ ' is typing...';
+    }, 500)
+    typingUsers[receivedUserIndex].timeoutId = timeoutId
   }
 
-  typingUsersDiv.innerText = JSON.stringify(typingUsers[0].nickname);
+  typingUsersDiv.innerText = JSON.stringify(typingUsers)+' is typing...';
 });
