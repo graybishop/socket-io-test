@@ -1,6 +1,6 @@
 import './App.css';
 import { io } from "socket.io-client";
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 const socket = io();
 
 const App = () => {
@@ -13,11 +13,10 @@ const App = () => {
     socketId: socket.id
   });
   const [buttonText, setButtonText] = useState('Submit Nickname');
-  const [firstTime, updateFirstTime] = useState(true)
-  const [value, setValue] = useState('')
+  const [firstTime, updateFirstTime] = useState(true);
+  const [value, setValue] = useState('');
 
   const input = document.getElementById('input');
-  const button = document.getElementById('submitButton');
   const typingUsersDiv = document.getElementById('typing-users');
   const messages = document.getElementById('messages');
 
@@ -67,24 +66,24 @@ const App = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (input.value && !user.nickname) {
-      user.nickname = input.value;
+    if (value && !user.nickname) {
+      user.nickname = value;
       user.userColor = generateColor();
       user.guid = user.nickname + user.userColor;
       appendNewMessage(`Welcome to the chat ${user.nickname}.`, user.userColor);
       socket.emit('user created', user);
-      button.textContent = 'Send';
-      input.value = '';
+      setButtonText('Send');
+      setValue('');
     }
 
     if (input.value && user.nickname) {
       socket.emit('chat message', input.value, user);
-      input.value = '';
+      setValue('');
     }
   };
 
   const handleInput = (e) => {
-    setValue(e.target.value)
+    setValue(e.target.value);
     if (value && user.guid) {
       socket.emit('user typing', user);
     }
@@ -149,7 +148,7 @@ const App = () => {
 
     //if typingUsers does not contain the user we have received
     //then add the user to the typingUsers array, after setting up
-    //a cooldown that removes it.
+    //a cool down that removes it.
     const receivedUserIndex = typingUsers.findIndex(element => {
       return element.guid === user.guid;
     });
@@ -166,9 +165,9 @@ const App = () => {
     updateTypingHtml(typingUsers);
   });
 
-  if (firstTime){
-    appendNewMessage('This is your first time, please submit a nickname')
-    updateFirstTime(false)
+  if (firstTime) {
+    appendNewMessage('This is your first time, please submit a nickname');
+    updateFirstTime(false);
   }
 
 
