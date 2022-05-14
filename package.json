@@ -20,13 +20,9 @@
   },
   "homepage": "https://github.com/graybishop/socket-io-test#readme",
   "dependencies": {
-    "connect-livereload": "^0.6.1",
     "express": "^4.18.1",
     "nodemon": "^2.0.16",
     "socket.io": "^4.5.0"
   },
-  "type": "module",
-  "devDependencies": {
-    "livereload": "^0.9.3"
-  }
+  "type": "module"
 }
