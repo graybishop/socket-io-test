@@ -1,6 +1,6 @@
 import './App.css';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { socket } from './socket-config.js';
 
 const App = () => {
@@ -200,7 +200,7 @@ const App = () => {
 const MessageList = (props) => {
   const messages = props.messageList.map((element, index) => {
     return (
-      <Message msgText={element.msgText} msgColor={element.msgColor} formatted={element.formatted} key={index} />
+      <Message msgText={element.msgText} msgColor={element.msgColor} formatted={element.formatted} key={index} latest={index !== props.messageList.length}/>
     );
   });
 
@@ -211,9 +211,16 @@ const MessageList = (props) => {
   );
 };
 
-const Message = ({ msgText, msgColor, formatted }) => {
+const Message = ({ msgText, msgColor, formatted, latest }) => {
+  const listEl = useRef()
+  useEffect(()=>{
+    if (latest){
+      listEl.current.scrollIntoView({ behavior: "smooth" })
+    }
+  },[latest])
+
   return (
-    <li style={{ color: msgColor }} >
+    <li style={{ color: msgColor }} ref={listEl}>
       {msgText}
     </li>
   );
