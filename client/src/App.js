@@ -74,8 +74,8 @@ const App = () => {
       return
     }
 
-    if (input.value && user.nickname) {
-      socket.emit('chat message', input.value, user);
+    if (value && user.nickname) {
+      socket.emit('chat message', value, user);
       setValue('');
       return
     }
@@ -83,10 +83,46 @@ const App = () => {
 
   const handleInput = (e) => {
     setValue(e.target.value);
-    if (value && user.guid) {
+    if (value.length >= 0  && user.guid) {
       socket.emit('user typing', user);
     }
   };
+  
+  //controls the text inside of the typing div. Can be refactored/extracted into it's own component. 
+  //should refactor to remove all of the direct html manipulation, and the typingUserDiv ref
+  useEffect(()=>{
+    const updateTypingHtml = () => {
+      console.log(`STEP3: array given to update HTML func ${JSON.stringify(typingUsers)}`, typingUsers)
+      typingUsersDiv.current.innerHTML = '';
+  
+      const createColoredNameSpan = (userData) => {
+        const span = document.createElement('span');
+        span.style.color = userData.userColor;
+        span.innerText = userData.nickname;
+        return span;
+      };
+  
+      if (typingUsers.length === 0) {
+        return;
+      }
+  
+      if (typingUsers.length === 1) {
+        console.log('STEP3: HTML Updated for one user', typingUsers)
+        typingUsersDiv.current.innerHTML = '';
+        typingUsersDiv.current.appendChild(createColoredNameSpan(typingUsers[0]));
+        typingUsersDiv.current.insertAdjacentHTML('beforeend', ' is typing...');
+        return;
+      }
+  
+      if (typingUsers.length > 1) {
+        typingUsersDiv.current.innerHTML = '';
+        typingUsersDiv.current.appendChild(createColoredNameSpan(typingUsers[0]));
+        typingUsersDiv.current.insertAdjacentHTML('beforeend', ' and others are typing...');
+        return;
+      }
+    };
+    updateTypingHtml()
+  })
 
   useEffect(()=>{
     socket.on('chat message', (msg, { nickname, userColor }) => {
@@ -102,36 +138,7 @@ const App = () => {
     });
 
     socket.on('user typing', user => {
-      
-      const updateTypingHtml = userArray => {
-        console.log(typingUsers)
-        typingUsersDiv.current.innerHTML = '';
-  
-        const createColoredNameSpan = (userData) => {
-          const span = document.createElement('span');
-          span.style.color = userData.userColor;
-          span.innerText = userData.nickname;
-          return span;
-        };
-  
-        if (userArray.length === 0) {
-          return;
-        }
-  
-        if (userArray.length === 1) {
-          typingUsersDiv.current.innerHTML = '';
-          typingUsersDiv.current.appendChild(createColoredNameSpan(userArray[0]));
-          typingUsersDiv.current.insertAdjacentHTML('beforeend', ' is typing...');
-          return;
-        }
-  
-        if (userArray.length > 1) {
-          typingUsersDiv.current.innerHTML = '';
-          typingUsersDiv.current.appendChild(createColoredNameSpan(userArray[0]));
-          typingUsersDiv.current.insertAdjacentHTML('beforeend', ' and others are typing...');
-          return;
-        }
-      };
+
   
       const removeTypingUserFromArray = () => {
         console.log('running cleanup')
@@ -144,33 +151,33 @@ const App = () => {
             return element.guid !== user.guid;
           })]
         })
-
-        updateTypingHtml(typingUsers);
       };
   
       const timeoutSetUp = () => {
         return setTimeout(() => {
           removeTypingUserFromArray();
-        }, 1000);
+        }, 1200);
       };
+
       //if typingUsers does not contain the user we have received
       //then add the user to the typingUsers array, after setting up
       //a cool down that removes it.
       const receivedUserIndex = typingUsers.findIndex(element => {
         return element.guid === user.guid;
       });
+      console.log('STEP 1: look for the user in the array', user, receivedUserIndex)
       if (receivedUserIndex === -1) {
         const timeoutId = timeoutSetUp();
         let modifiedUser = { ...user, timeoutId };
-        setTypingUsers([...typingUsers, modifiedUser])
-        // typingUsers.push(modifiedUser);
+        console.log('STEP 2a: if user is not in array, modify object, then add it to the typing users state and call for a state change', modifiedUser)
+        setTypingUsers(prevState => {
+          return [...prevState, modifiedUser]
+        })
       } else {
         clearTimeout(typingUsers[receivedUserIndex].timeoutId);
         const timeoutId = timeoutSetUp();
         typingUsers[receivedUserIndex].timeoutId = timeoutId;
       }
-  
-      updateTypingHtml(typingUsers);
     });
 
     return () =>{
@@ -193,9 +200,7 @@ const App = () => {
     <div className='body'>
       <MessageList messageList={messageList} />
       <div id="input-container">
-        <div id="typing-users" ref={typingUsersDiv}>
-          This will display who is typing...
-        </div>
+        <div id="typing-users" ref={typingUsersDiv}></div>
         <form onSubmit={handleSubmit} id="form" action="">
           <input onInput={handleInput} id='input' value={value} autoComplete="off" /><SubmitButton buttonText={buttonText} />
         </form>
