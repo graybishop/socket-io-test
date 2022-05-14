@@ -81,11 +81,9 @@ const App = () => {
     }
   };
 
+  //controlled component/ when user types in message, the value State is updated to the input string.
   const handleInput = (e) => {
     setValue(e.target.value);
-    if (value.length >= 0  && user.guid) {
-      socket.emit('user typing', user);
-    }
   };
   
   //controls the text inside of the typing div. Can be refactored/extracted into it's own component. 
@@ -120,7 +118,15 @@ const App = () => {
       }
     };
     updateTypingHtml()
+
   })
+  
+  useEffect(()=>{   
+    //if user is typing a message, and has registered, emits a custom event to server 
+    if (value && user.guid) {
+      socket.emit('user typing', user);
+    }
+  },[value, user])
 
   useEffect(()=>{
     socket.on('chat message', (msg, { nickname, userColor }) => {
