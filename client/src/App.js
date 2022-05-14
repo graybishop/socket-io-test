@@ -92,7 +92,6 @@ const App = () => {
   //should refactor to remove all of the direct html manipulation, and the typingUserDiv ref
   useEffect(()=>{
     const updateTypingHtml = () => {
-      console.log(`STEP3: array given to update HTML func ${JSON.stringify(typingUsers)}`, typingUsers)
       typingUsersDiv.current.innerHTML = '';
   
       const createColoredNameSpan = (userData) => {
@@ -107,7 +106,6 @@ const App = () => {
       }
   
       if (typingUsers.length === 1) {
-        console.log('STEP3: HTML Updated for one user', typingUsers)
         typingUsersDiv.current.innerHTML = '';
         typingUsersDiv.current.appendChild(createColoredNameSpan(typingUsers[0]));
         typingUsersDiv.current.insertAdjacentHTML('beforeend', ' is typing...');
@@ -141,12 +139,7 @@ const App = () => {
 
   
       const removeTypingUserFromArray = () => {
-        console.log('running cleanup')
         setTypingUsers(prevState =>{
-          console.log(prevState)
-          console.log(prevState.filter(element => {
-            return element.guid !== user.guid;
-          }))
           return [...prevState.filter(element => {
             return element.guid !== user.guid;
           })]
@@ -165,11 +158,9 @@ const App = () => {
       const receivedUserIndex = typingUsers.findIndex(element => {
         return element.guid === user.guid;
       });
-      console.log('STEP 1: look for the user in the array', user, receivedUserIndex)
       if (receivedUserIndex === -1) {
         const timeoutId = timeoutSetUp();
         let modifiedUser = { ...user, timeoutId };
-        console.log('STEP 2a: if user is not in array, modify object, then add it to the typing users state and call for a state change', modifiedUser)
         setTypingUsers(prevState => {
           return [...prevState, modifiedUser]
         })
