@@ -15,13 +15,11 @@ const App = () => {
   const [buttonText, setButtonText] = useState('Submit Nickname');
   const [firstTime, updateFirstTime] = useState(true);
   const [value, setValue] = useState('');
+  // const typingUsers =useRef([])
   const [typingUsers, setTypingUsers] = useState([])
-
-  const input = document.getElementById('input');
-  const typingUsersDiv = document.getElementById('typing-users');
+  const typingUsersDiv = useRef(null)
 
   const appendNewMessage = (msgText, msgColor, formatted) => {
-    console.log('adding message', {msgText, msgColor, formatted})
     setMessageList((prevState)=>{
       return [...prevState, {msgText, msgColor, formatted}]
     });
@@ -103,74 +101,85 @@ const App = () => {
       appendNewMessage(`${user.nickname} has disconnected.</span>`, 'white', true);
     });
 
+    socket.on('user typing', user => {
+      
+      const updateTypingHtml = userArray => {
+        console.log(typingUsers)
+        typingUsersDiv.current.innerHTML = '';
+  
+        const createColoredNameSpan = (userData) => {
+          const span = document.createElement('span');
+          span.style.color = userData.userColor;
+          span.innerText = userData.nickname;
+          return span;
+        };
+  
+        if (userArray.length === 0) {
+          return;
+        }
+  
+        if (userArray.length === 1) {
+          typingUsersDiv.current.innerHTML = '';
+          typingUsersDiv.current.appendChild(createColoredNameSpan(userArray[0]));
+          typingUsersDiv.current.insertAdjacentHTML('beforeend', ' is typing...');
+          return;
+        }
+  
+        if (userArray.length > 1) {
+          typingUsersDiv.current.innerHTML = '';
+          typingUsersDiv.current.appendChild(createColoredNameSpan(userArray[0]));
+          typingUsersDiv.current.insertAdjacentHTML('beforeend', ' and others are typing...');
+          return;
+        }
+      };
+  
+      const removeTypingUserFromArray = () => {
+        console.log('running cleanup')
+        setTypingUsers(prevState =>{
+          console.log(prevState)
+          console.log(prevState.filter(element => {
+            return element.guid !== user.guid;
+          }))
+          return [...prevState.filter(element => {
+            return element.guid !== user.guid;
+          })]
+        })
+
+        updateTypingHtml(typingUsers);
+      };
+  
+      const timeoutSetUp = () => {
+        return setTimeout(() => {
+          removeTypingUserFromArray();
+        }, 1000);
+      };
+      //if typingUsers does not contain the user we have received
+      //then add the user to the typingUsers array, after setting up
+      //a cool down that removes it.
+      const receivedUserIndex = typingUsers.findIndex(element => {
+        return element.guid === user.guid;
+      });
+      if (receivedUserIndex === -1) {
+        const timeoutId = timeoutSetUp();
+        let modifiedUser = { ...user, timeoutId };
+        setTypingUsers([...typingUsers, modifiedUser])
+        // typingUsers.push(modifiedUser);
+      } else {
+        clearTimeout(typingUsers[receivedUserIndex].timeoutId);
+        const timeoutId = timeoutSetUp();
+        typingUsers[receivedUserIndex].timeoutId = timeoutId;
+      }
+  
+      updateTypingHtml(typingUsers);
+    });
+
     return () =>{
       socket.off('chat message')
       socket.off('user disconnected')
+      socket.off('user typing')
     }
-  }, [])
+  }, [typingUsers])
 
-  socket.on('user typing', user => {
-
-    const updateTypingHtml = userArray => {
-      typingUsersDiv.innerHTML = '';
-
-      const createColoredNameSpan = (userData) => {
-        const span = document.createElement('span');
-        span.style.color = userData.userColor;
-        span.innerText = userData.nickname;
-        return span;
-      };
-
-      if (userArray.length === 0) {
-        return;
-      }
-
-      if (userArray.length === 1) {
-        typingUsersDiv.innerHTML = '';
-        typingUsersDiv.appendChild(createColoredNameSpan(userArray[0]));
-        typingUsersDiv.insertAdjacentHTML('beforeend', ' is typing...');
-        return;
-      }
-
-      if (userArray.length > 1) {
-        typingUsersDiv.innerHTML = '';
-        typingUsersDiv.appendChild(createColoredNameSpan(userArray[0]));
-        typingUsersDiv.insertAdjacentHTML('beforeend', ' and others are typing...');
-        return;
-      }
-    };
-
-    const removeTypingUserFromArray = () => {
-      setTypingUsers(typingUsers.filter(element => {
-        return element.guid !== user.guid;
-      }));
-      updateTypingHtml(typingUsers);
-    };
-
-    const timeoutSetUp = () => {
-      return setTimeout(() => {
-        removeTypingUserFromArray();
-      }, 1250);
-    };
-
-    //if typingUsers does not contain the user we have received
-    //then add the user to the typingUsers array, after setting up
-    //a cool down that removes it.
-    const receivedUserIndex = typingUsers.findIndex(element => {
-      return element.guid === user.guid;
-    });
-    if (receivedUserIndex === -1) {
-      const timeoutId = timeoutSetUp();
-      let modifiedUser = { ...user, timeoutId };
-      typingUsers.push(modifiedUser);
-    } else {
-      clearTimeout(typingUsers[receivedUserIndex].timeoutId);
-      const timeoutId = timeoutSetUp();
-      typingUsers[receivedUserIndex].timeoutId = timeoutId;
-    }
-
-    updateTypingHtml(typingUsers);
-  });
 
 
   if (firstTime) {
@@ -184,7 +193,7 @@ const App = () => {
     <div className='body'>
       <MessageList messageList={messageList} />
       <div id="input-container">
-        <div id="typing-users">
+        <div id="typing-users" ref={typingUsersDiv}>
           This will display who is typing...
         </div>
         <form onSubmit={handleSubmit} id="form" action="">
