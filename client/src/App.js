@@ -145,7 +145,10 @@ const App = () => {
     // });
 
     socket.on('user disconnected', (user) => {
-      appendNewMessage(`${user.nickname} has disconnected.</span>`, 'white', true);
+      let message = (
+        <span><span style={{color:user.userColor}}>{user.nickname}</span> has disconnected.</span>
+      )
+      appendNewMessage(message);
     });
 
     socket.on('user typing', user => {
@@ -218,7 +221,7 @@ const App = () => {
 const MessageList = (props) => {
   const messages = props.messageList.map((element, index) => {
     return (
-      <Message msgText={element.msgText} msgColor={element.msgColor} formatted={element.formatted} key={index} latest={index !== props.messageList.length}/>
+      <Message msgText={element.msgText} msgColor={element.msgColor} key={index} latest={index !== props.messageList.length}/>
     );
   });
 
@@ -229,7 +232,8 @@ const MessageList = (props) => {
   );
 };
 
-const Message = ({ msgText, msgColor, formatted, latest }) => {
+const Message = ({ msgText, msgColor, latest }) => {
+  //this ref and useEffect are used to enable browser scrollIntoView
   const listEl = useRef()
   useEffect(()=>{
     if (latest){
