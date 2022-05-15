@@ -10,7 +10,7 @@ const App = () => {
     nickname: '',
     userColor: '',
     guid: '',
-    socketId: socket.id
+    socketId: null
   });
   const [buttonText, setButtonText] = useState('Submit Nickname');
   const [firstTime, updateFirstTime] = useState(true);
@@ -64,11 +64,18 @@ const App = () => {
     e.preventDefault();
 
     if (value && !user.nickname) {
-      user.nickname = value;
-      user.userColor = generateColor();
-      user.guid = user.nickname + user.userColor;
-      appendNewMessage(`Welcome to the chat ${user.nickname}.`, user.userColor);
-      socket.emit('user created', user);
+      // user.nickname = value;
+      // user.userColor = generateColor();
+      // user.guid = user.nickname + user.userColor;
+      const tempUser = {
+        nickname: value,
+        userColor: generateColor(),
+        socket: socket.id
+      }
+      tempUser.guid = tempUser.nickname + tempUser.userColor
+      appendNewMessage(`Welcome to the chat ${tempUser.nickname}.`, tempUser.userColor);
+      socket.emit('user created', tempUser);
+      setUser({...tempUser})
       setButtonText('Send');
       setValue('');
       return

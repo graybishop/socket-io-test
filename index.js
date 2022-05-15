@@ -34,8 +34,8 @@ app.get('/', (req, res) => {
 
 io.on('connection', (socket) => {
   socket.on('disconnect', () => {
-    let disconnectedUserIndex = users.findIndex(({ socketId }) => {
-      return socketId == socket.id;
+    let disconnectedUserIndex = users.findIndex(element => {
+      return element.socket === socket.id;
     });
     if (disconnectedUserIndex !== -1) {
       socket.broadcast.emit('user disconnected', users.splice(disconnectedUserIndex, 1)[0]);
