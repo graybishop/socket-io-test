@@ -16,12 +16,12 @@ const App = () => {
   const [firstTime, updateFirstTime] = useState(true);
   const [value, setValue] = useState('');
   // const typingUsers =useRef([])
-  const [typingUsers, setTypingUsers] = useState([])
-  const typingUsersDiv = useRef(null)
+  const [typingUsers, setTypingUsers] = useState([]);
+  const typingUsersDiv = useRef(null);
 
   const appendNewMessage = (msgText, msgColor, formatted) => {
-    setMessageList((prevState)=>{
-      return [...prevState, {msgText, msgColor, formatted}]
+    setMessageList((prevState) => {
+      return [...prevState, { msgText, msgColor, formatted }];
     });
   };
 
@@ -64,27 +64,24 @@ const App = () => {
     e.preventDefault();
 
     if (value && !user.nickname) {
-      // user.nickname = value;
-      // user.userColor = generateColor();
-      // user.guid = user.nickname + user.userColor;
       const tempUser = {
         nickname: value,
         userColor: generateColor(),
         socket: socket.id
-      }
-      tempUser.guid = tempUser.nickname + tempUser.userColor
+      };
+      tempUser.guid = tempUser.nickname + tempUser.userColor;
       appendNewMessage(`Welcome to the chat ${tempUser.nickname}.`, tempUser.userColor);
       socket.emit('user created', tempUser);
-      setUser({...tempUser})
+      setUser({ ...tempUser });
       setButtonText('Send');
       setValue('');
-      return
+      return;
     }
 
     if (value && user.nickname) {
       socket.emit('chat message', value, user);
       setValue('');
-      return
+      return;
     }
   };
 
@@ -92,31 +89,31 @@ const App = () => {
   const handleInput = (e) => {
     setValue(e.target.value);
   };
-  
+
   //controls the text inside of the typing div. Can be refactored/extracted into it's own component. 
   //should refactor to remove all of the direct html manipulation, and the typingUserDiv ref
-  useEffect(()=>{
+  useEffect(() => {
     const updateTypingHtml = () => {
       typingUsersDiv.current.innerHTML = '';
-  
+
       const createColoredNameSpan = (userData) => {
         const span = document.createElement('span');
         span.style.color = userData.userColor;
         span.innerText = userData.nickname;
         return span;
       };
-  
+
       if (typingUsers.length === 0) {
         return;
       }
-  
+
       if (typingUsers.length === 1) {
         typingUsersDiv.current.innerHTML = '';
         typingUsersDiv.current.appendChild(createColoredNameSpan(typingUsers[0]));
         typingUsersDiv.current.insertAdjacentHTML('beforeend', ' is typing...');
         return;
       }
-  
+
       if (typingUsers.length > 1) {
         typingUsersDiv.current.innerHTML = '';
         typingUsersDiv.current.appendChild(createColoredNameSpan(typingUsers[0]));
@@ -124,44 +121,67 @@ const App = () => {
         return;
       }
     };
-    updateTypingHtml()
+    updateTypingHtml();
 
-  })
-  
-  useEffect(()=>{   
+  });
+
+  useEffect(() => {
     //if user is typing a message, and has registered, emits a custom event to server 
     if (value && user.guid) {
       socket.emit('user typing', user);
     }
-  },[value, user])
+  }, [value, user]);
 
-  useEffect(()=>{
+  useEffect(() => {
     socket.on('chat message', (msg, { nickname, userColor }) => {
       appendNewMessage(`${nickname}: ${msg}`, userColor);
     });
 
-    // socket.on('user connected', (users) => {
-    //   appendUserList(users);
-    // });
+    socket.on('user connected', (users) => {
+      let userSection = (
+        <span>
+          {users.length > 1 ?
+            users.map(({ nickname, userColor }, index) => {
+              let userSpanStyle = { color: userColor, fontWeight: 'bold' };
+
+              return index !== users.length - 1 ? (
+                <span style={userSpanStyle}>{nickname}, </span>
+              ) :
+                (<span>
+                  <span >and </span>
+                  <span style={userSpanStyle}>{nickname}.</span>
+                </span>);
+            }) : (<span>{users[0].nickname}.</span>)}
+        </span>
+      );
+
+      let message = (
+        <span>
+          <span>A user has connected. Current User Count: {users.length}. Users: </span> {userSection}
+        </span>
+      );
+
+      appendNewMessage(message);
+    });
 
     socket.on('user disconnected', (user) => {
       let message = (
-        <span><span style={{color:user.userColor}}>{user.nickname}</span> has disconnected.</span>
-      )
+        <span><span style={{ color: user.userColor }}>{user.nickname}</span> has disconnected.</span>
+      );
       appendNewMessage(message);
     });
 
     socket.on('user typing', user => {
 
-  
+
       const removeTypingUserFromArray = () => {
-        setTypingUsers(prevState =>{
+        setTypingUsers(prevState => {
           return [...prevState.filter(element => {
             return element.guid !== user.guid;
-          })]
-        })
+          })];
+        });
       };
-  
+
       const timeoutSetUp = () => {
         return setTimeout(() => {
           removeTypingUserFromArray();
@@ -178,8 +198,8 @@ const App = () => {
         const timeoutId = timeoutSetUp();
         let modifiedUser = { ...user, timeoutId };
         setTypingUsers(prevState => {
-          return [...prevState, modifiedUser]
-        })
+          return [...prevState, modifiedUser];
+        });
       } else {
         clearTimeout(typingUsers[receivedUserIndex].timeoutId);
         const timeoutId = timeoutSetUp();
@@ -187,12 +207,13 @@ const App = () => {
       }
     });
 
-    return () =>{
-      socket.off('chat message')
-      socket.off('user disconnected')
-      socket.off('user typing')
-    }
-  }, [typingUsers])
+    return () => {
+      socket.off('chat message');
+      socket.off('user connected');
+      socket.off('user disconnected');
+      socket.off('user typing');
+    };
+  }, [typingUsers]);
 
 
 
@@ -221,7 +242,7 @@ const App = () => {
 const MessageList = (props) => {
   const messages = props.messageList.map((element, index) => {
     return (
-      <Message msgText={element.msgText} msgColor={element.msgColor} key={index} latest={index !== props.messageList.length}/>
+      <Message msgText={element.msgText} msgColor={element.msgColor} key={index} latest={index !== props.messageList.length} />
     );
   });
 
@@ -234,12 +255,12 @@ const MessageList = (props) => {
 
 const Message = ({ msgText, msgColor, latest }) => {
   //this ref and useEffect are used to enable browser scrollIntoView
-  const listEl = useRef()
-  useEffect(()=>{
-    if (latest){
-      listEl.current.scrollIntoView({ behavior: "smooth" })
+  const listEl = useRef();
+  useEffect(() => {
+    if (latest) {
+      listEl.current.scrollIntoView({ behavior: "smooth" });
     }
-  },[latest])
+  }, [latest]);
 
   return (
     <li style={{ color: msgColor }} ref={listEl}>
