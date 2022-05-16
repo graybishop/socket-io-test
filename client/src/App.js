@@ -1,4 +1,6 @@
 import './App.css';
+import MessageList from './components/MessageList.js';
+import SubmitButton from './components/SubmitButton.js';
 
 import { useEffect, useRef, useState } from 'react';
 import { socket } from './socket-config.js';
@@ -15,7 +17,6 @@ const App = () => {
   const [buttonText, setButtonText] = useState('Submit Nickname');
   const [firstTime, updateFirstTime] = useState(true);
   const [value, setValue] = useState('');
-  // const typingUsers =useRef([])
   const [typingUsers, setTypingUsers] = useState([]);
   const typingUsersDiv = useRef(null);
 
@@ -25,32 +26,7 @@ const App = () => {
     });
   };
 
-  // const appendUserList = (users) => {
-  //   const item = document.createElement('li');
-  //   item.textContent = `A user has connected. Current User Count: ${users.length}. Users: `;
-  //   messages.appendChild(item);
-  //   if (users.length > 1) {
-  //     users.forEach(({ nickname, userColor }, index) => {
-  //       const span = document.createElement('span');
-  //       span.style.color = userColor;
-  //       span.style.fontWeight = 'bold';
-  //       index !== users.length - 1 ?
-  //         span.textContent = `${nickname}${users.length > 2 ? ',' : ''} `
-  //         :
-  //         span.innerHTML = `<span style='font-weight:normal; color:white'>and</span> ${nickname}.`;
-  //       item.appendChild(span);
-  //     });
-  //   } else {
-  //     const span = document.createElement('span');
-  //     span.style.color = users[0].userColor;
-  //     span.style.fontWeight = 'bold';
-  //     span.textContent = `${users[0].nickname}.`;
-  //     item.appendChild(span);
-  //   }
-
-  //   window.scrollTo(0, document.body.scrollHeight);
-  // };
-
+  //helper function - returns a random hex color as a string
   const generateColor = () => {
     const letters = '0123456789ABCDEF'.split('');
     let color = '#';
@@ -60,28 +36,29 @@ const App = () => {
     return color;
   };
 
+  //form submission handler - checks if there is text in the message box, and if the user has registered
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (value && !user.nickname) {
-      const tempUser = {
-        nickname: value,
-        userColor: generateColor(),
-        socket: socket.id
-      };
-      tempUser.guid = tempUser.nickname + tempUser.userColor;
-      appendNewMessage(`Welcome to the chat ${tempUser.nickname}.`, tempUser.userColor);
-      socket.emit('user created', tempUser);
-      setUser({ ...tempUser });
-      setButtonText('Send');
-      setValue('');
-      return;
-    }
-
-    if (value && user.nickname) {
-      socket.emit('chat message', value, user);
-      setValue('');
-      return;
+    if (value) {
+      if (!user.nickname) {
+        const tempUser = {
+          nickname: value,
+          userColor: generateColor(),
+          socket: socket.id
+        };
+        tempUser.guid = tempUser.nickname + tempUser.userColor;
+        appendNewMessage(`Welcome to the chat ${tempUser.nickname}.`, tempUser.userColor);
+        socket.emit('user created', tempUser);
+        setUser({ ...tempUser });
+        setButtonText('Send');
+        setValue('');
+        return;
+      } else {
+        socket.emit('chat message', value, user);
+        setValue('');
+        return;
+      }
     }
   };
 
@@ -93,7 +70,8 @@ const App = () => {
   //controls the text inside of the typing div. Can be refactored/extracted into it's own component. 
   //should refactor to remove all of the direct html manipulation, and the typingUserDiv ref
   useEffect(() => {
-    const updateTypingHtml = () => {
+
+    const updateTypingSection = () => {
       typingUsersDiv.current.innerHTML = '';
 
       const createColoredNameSpan = (userData) => {
@@ -121,8 +99,7 @@ const App = () => {
         return;
       }
     };
-    updateTypingHtml();
-
+    updateTypingSection();
   });
 
   useEffect(() => {
@@ -132,6 +109,7 @@ const App = () => {
     }
   }, [value, user]);
 
+  //subscribes and unsubscribes socket event listeners
   useEffect(() => {
     socket.on('chat message', (msg, { nickname, userColor }) => {
       appendNewMessage(`${nickname}: ${msg}`, userColor);
@@ -215,14 +193,10 @@ const App = () => {
     };
   }, [typingUsers]);
 
-
-
   if (firstTime) {
     updateFirstTime(false);
     appendNewMessage('Please enter your nickname below 📜.');
   }
-
-
 
   return (
     <div className='body'>
@@ -237,42 +211,6 @@ const App = () => {
     </div>
   );
 
-};
-
-const MessageList = (props) => {
-  const messages = props.messageList.map((element, index) => {
-    return (
-      <Message msgText={element.msgText} msgColor={element.msgColor} key={index} latest={index !== props.messageList.length} />
-    );
-  });
-
-  return (
-    <ul className='messages'>
-      {messages}
-    </ul>
-  );
-};
-
-const Message = ({ msgText, msgColor, latest }) => {
-  //this ref and useEffect are used to enable browser scrollIntoView
-  const listEl = useRef();
-  useEffect(() => {
-    if (latest) {
-      listEl.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [latest]);
-
-  return (
-    <li style={{ color: msgColor }} ref={listEl}>
-      {msgText}
-    </li>
-  );
-};
-
-const SubmitButton = ({ buttonText }) => {
-  return (
-    <button>{buttonText}</button>
-  );
 };
 
 export default App;
