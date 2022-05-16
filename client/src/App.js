@@ -1,6 +1,7 @@
 import './App.css';
 import MessageList from './components/MessageList.js';
 import SubmitButton from './components/SubmitButton.js';
+import TypingUsers from './components/TypingUsers.js';
 
 import { useEffect, useRef, useState } from 'react';
 import { socket } from './socket-config.js';
@@ -18,7 +19,6 @@ const App = () => {
   const [firstTime, updateFirstTime] = useState(true);
   const [value, setValue] = useState('');
   const [typingUsers, setTypingUsers] = useState([]);
-  const typingUsersDiv = useRef(null);
 
   const appendNewMessage = (msgText, msgColor, formatted) => {
     setMessageList((prevState) => {
@@ -67,41 +67,6 @@ const App = () => {
     setValue(e.target.value);
   };
 
-  //controls the text inside of the typing div. Can be refactored/extracted into it's own component. 
-  //should refactor to remove all of the direct html manipulation, and the typingUserDiv ref
-  useEffect(() => {
-
-    const updateTypingSection = () => {
-      typingUsersDiv.current.innerHTML = '';
-
-      const createColoredNameSpan = (userData) => {
-        const span = document.createElement('span');
-        span.style.color = userData.userColor;
-        span.innerText = userData.nickname;
-        return span;
-      };
-
-      if (typingUsers.length === 0) {
-        return;
-      }
-
-      if (typingUsers.length === 1) {
-        typingUsersDiv.current.innerHTML = '';
-        typingUsersDiv.current.appendChild(createColoredNameSpan(typingUsers[0]));
-        typingUsersDiv.current.insertAdjacentHTML('beforeend', ' is typing...');
-        return;
-      }
-
-      if (typingUsers.length > 1) {
-        typingUsersDiv.current.innerHTML = '';
-        typingUsersDiv.current.appendChild(createColoredNameSpan(typingUsers[0]));
-        typingUsersDiv.current.insertAdjacentHTML('beforeend', ' and others are typing...');
-        return;
-      }
-    };
-    updateTypingSection();
-  });
-
   useEffect(() => {
     //if user is typing a message, and has registered, emits a custom event to server 
     if (value && user.guid) {
@@ -123,10 +88,10 @@ const App = () => {
               let userSpanStyle = { color: userColor, fontWeight: 'bold' };
 
               return index !== users.length - 1 ? (
-                <span style={userSpanStyle}>{nickname}, </span>
+                <span style={userSpanStyle} key={index}>{nickname}, </span>
               ) :
-                (<span>
-                  <span >and </span>
+                (<span key={index}>
+                  <span>and </span>
                   <span style={userSpanStyle}>{nickname}.</span>
                 </span>);
             }) : (<span>{users[0].nickname}.</span>)}
@@ -202,7 +167,7 @@ const App = () => {
     <div className='body'>
       <MessageList messageList={messageList} />
       <div id="input-container">
-        <div id="typing-users" ref={typingUsersDiv}></div>
+        <TypingUsers typingUsers={typingUsers}/>
         <form onSubmit={handleSubmit} id="form" action="">
           <input onInput={handleInput} id='input' value={value} autoComplete="off" /><SubmitButton buttonText={buttonText} />
         </form>
