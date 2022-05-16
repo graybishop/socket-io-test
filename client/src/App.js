@@ -3,7 +3,7 @@ import MessageList from './components/MessageList.js';
 import SubmitButton from './components/SubmitButton.js';
 import TypingUsers from './components/TypingUsers.js';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { socket } from './socket-config.js';
 
 const App = () => {
