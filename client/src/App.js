@@ -16,6 +16,13 @@ const App = () => {
   const [value, setValue] = useState('');
   const [typingUsers, setTypingUsers] = useState([]);
 
+  useEffect(()=>{
+    console.log(user)
+    if (user !== null){
+      socket.emit('user created', user)
+    }
+  }, [user])
+
   const appendNewMessage = (msgText, msgColor, unique) => {
     console.log('appending new message', msgText);
     setMessageList((prevState) => {
@@ -50,7 +57,6 @@ const App = () => {
         const tempUser = {
           nickname: value,
           userColor: generateColor(),
-          socket: socket.id
         };
         tempUser.guid = tempUser.nickname + tempUser.userColor;
         appendNewMessage(<span>Welcome to the chat <span style={{ color: tempUser.userColor }}>{tempUser.nickname}.</span></span>);
@@ -100,13 +106,13 @@ const App = () => {
                   <span>and </span>
                   <span style={userSpanStyle}>{nickname}.</span>
                 </span>);
-            }) : (<span>{users[0].nickname}.</span>)}
+            }) : (<span style={{ color: users[0].userColor, fontWeight: 'bold' }}>{users[0].nickname}.</span>)}
         </span>
       );
 
       let message = (
         <span>
-          <span>A user has connected. Current User Count: {users.length}. Users: </span> {userSection}
+          <span>User has connected. Users: </span> {userSection} ({users.length} User{users.length === 1 ? '' : 's'})
         </span>
       );
 

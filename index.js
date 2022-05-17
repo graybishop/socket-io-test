@@ -45,7 +45,7 @@ io.on('connection', (socket) => {
     io.emit('chat message', msg, { nickname, userColor });
   });
   socket.on('user created', (user) => {
-    users.push(user);
+    users.push({...user, socket: socket.id});
     socket.broadcast.emit('user connected', users);
   });
   socket.on('user typing', (user) => {
