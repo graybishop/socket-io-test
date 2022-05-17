@@ -9,20 +9,22 @@ import { socket } from './socket-config.js';
 const App = () => {
 
   const [messageList, setMessageList] = useState([]);
-  const [user, setUser] = useState({
-    nickname: '',
-    userColor: '',
-    guid: '',
-    socketId: null
-  });
+  const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')));
   const [buttonText, setButtonText] = useState('Submit Nickname');
-  const [firstTime, updateFirstTime] = useState(true);
   const [value, setValue] = useState('');
   const [typingUsers, setTypingUsers] = useState([]);
 
-  const appendNewMessage = (msgText, msgColor, formatted) => {
+  const appendNewMessage = (msgText, msgColor, unique) => {
     setMessageList((prevState) => {
-      return [...prevState, { msgText, msgColor, formatted }];
+      if (prevState.length === 0) {
+        return [...prevState, { msgText, msgColor }];
+      }
+
+      if (!unique) {
+        return [...prevState, { msgText, msgColor }];
+      } else {
+        return prevState[prevState.length - 1].msgText === msgText ? [...prevState] : [...prevState, { msgText, msgColor }];
+      }
     });
   };
 
@@ -41,7 +43,7 @@ const App = () => {
     e.preventDefault();
 
     if (value) {
-      if (!user.nickname) {
+      if (user === null) {
         const tempUser = {
           nickname: value,
           userColor: generateColor(),
@@ -50,6 +52,7 @@ const App = () => {
         tempUser.guid = tempUser.nickname + tempUser.userColor;
         appendNewMessage(`Welcome to the chat ${tempUser.nickname}.`, tempUser.userColor);
         socket.emit('user created', tempUser);
+        localStorage.setItem('user', JSON.stringify(tempUser));
         setUser({ ...tempUser });
         setButtonText('Send');
         setValue('');
@@ -69,7 +72,7 @@ const App = () => {
 
   useEffect(() => {
     //if user is typing a message, and has registered, emits a custom event to server 
-    if (value && user.guid) {
+    if (value && user !== null) {
       socket.emit('user typing', user);
     }
   }, [value, user]);
@@ -158,16 +161,20 @@ const App = () => {
     };
   }, [typingUsers]);
 
-  if (firstTime) {
-    updateFirstTime(false);
-    appendNewMessage('Please enter your nickname below 📜.');
-  }
+  useEffect(() => {
+    if (user === null) {
+      appendNewMessage('Please enter your nickname below 📜.', '', true);
+    } else {
+      appendNewMessage(<span>Welcome back to the chat <span style={{ color: user.userColor }}>{user.nickname}.</span></span>, '', true);
+    }
+  }, [user]);
+
 
   return (
     <div className='body'>
       <MessageList messageList={messageList} />
       <div id="input-container">
-        <TypingUsers typingUsers={typingUsers}/>
+        <TypingUsers typingUsers={typingUsers} />
         <form onSubmit={handleSubmit} id="form" action="">
           <input onInput={handleInput} id='input' value={value} autoComplete="off" /><SubmitButton buttonText={buttonText} />
         </form>
