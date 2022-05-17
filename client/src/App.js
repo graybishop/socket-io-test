@@ -8,13 +8,17 @@ import { socket } from './socket-config.js';
 
 const App = () => {
 
-  const [messageList, setMessageList] = useState([]);
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')));
+  const [userRegistered, setUserRegistered] = useState(localStorage.getItem('user') !== null);
+  const [messageList, setMessageList] = useState(userRegistered ?
+    [{ msgText: <span>Welcome back to the chat <span style={{ color: user.userColor }}>{user.nickname}.</span></span> }] :
+    [{ msgText: 'Please enter your nickname below 📜.' }]);
   const [buttonText, setButtonText] = useState('Submit Nickname');
   const [value, setValue] = useState('');
   const [typingUsers, setTypingUsers] = useState([]);
 
   const appendNewMessage = (msgText, msgColor, unique) => {
+    console.log('appending new message', msgText);
     setMessageList((prevState) => {
       if (prevState.length === 0) {
         return [...prevState, { msgText, msgColor }];
@@ -23,7 +27,7 @@ const App = () => {
       if (!unique) {
         return [...prevState, { msgText, msgColor }];
       } else {
-        return prevState[prevState.length - 1].msgText === msgText ? [...prevState] : [...prevState, { msgText, msgColor }];
+        return JSON.stringify(prevState[prevState.length - 1].msgText) === JSON.stringify(msgText) ? [...prevState] : [...prevState, { msgText, msgColor }];
       }
     });
   };
@@ -50,10 +54,11 @@ const App = () => {
           socket: socket.id
         };
         tempUser.guid = tempUser.nickname + tempUser.userColor;
-        appendNewMessage(`Welcome to the chat ${tempUser.nickname}.`, tempUser.userColor);
+        appendNewMessage(<span>Welcome to the chat <span style={{ color: tempUser.userColor }}>{tempUser.nickname}.</span></span>);
         socket.emit('user created', tempUser);
         localStorage.setItem('user', JSON.stringify(tempUser));
         setUser({ ...tempUser });
+        setUserRegistered(true);
         setButtonText('Send');
         setValue('');
         return;
@@ -160,15 +165,6 @@ const App = () => {
       socket.off('user typing');
     };
   }, [typingUsers]);
-
-  useEffect(() => {
-    if (user === null) {
-      appendNewMessage('Please enter your nickname below 📜.', '', true);
-    } else {
-      appendNewMessage(<span>Welcome back to the chat <span style={{ color: user.userColor }}>{user.nickname}.</span></span>, '', true);
-    }
-  }, [user]);
-
 
   return (
     <div className='body'>
