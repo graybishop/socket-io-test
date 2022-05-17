@@ -9,8 +9,7 @@ import { socket } from './socket-config.js';
 const App = () => {
 
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')));
-  const [userRegistered, setUserRegistered] = useState(localStorage.getItem('user') !== null);
-  const [messageList, setMessageList] = useState(userRegistered ?
+  const [messageList, setMessageList] = useState(user !== null ?
     [{ msgText: <span>Welcome back to the chat <span style={{ color: user.userColor }}>{user.nickname}.</span></span> }] :
     [{ msgText: 'Please enter your nickname below 📜.' }]);
   const [buttonText, setButtonText] = useState('Submit Nickname');
@@ -58,7 +57,6 @@ const App = () => {
         socket.emit('user created', tempUser);
         localStorage.setItem('user', JSON.stringify(tempUser));
         setUser({ ...tempUser });
-        setUserRegistered(true);
         setButtonText('Send');
         setValue('');
         return;
