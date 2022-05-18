@@ -23,18 +23,10 @@ const App = () => {
     }
   }, [user])
 
-  const appendNewMessage = (msgText, msgColor, unique) => {
+  const appendNewMessage = (msgText, author) => {
     console.log('appending new message', msgText);
     setMessageList((prevState) => {
-      if (prevState.length === 0) {
-        return [...prevState, { msgText, msgColor }];
-      }
-
-      if (!unique) {
-        return [...prevState, { msgText, msgColor }];
-      } else {
-        return JSON.stringify(prevState[prevState.length - 1].msgText) === JSON.stringify(msgText) ? [...prevState] : [...prevState, { msgText, msgColor }];
-      }
+       return [...prevState, { msgText, author }];
     });
   };
 
@@ -89,7 +81,12 @@ const App = () => {
   //subscribes and unsubscribes socket event listeners
   useEffect(() => {
     socket.on('chat message', (msg, { nickname, userColor }) => {
-      appendNewMessage(`${nickname}: ${msg}`, userColor);
+      let span =(
+        <span>
+          <span style={{color:userColor, fontWeight:'bold'}}>{nickname}: </span>{msg}
+        </span>
+      )
+      appendNewMessage(span);
     });
 
     socket.on('user connected', (users) => {
