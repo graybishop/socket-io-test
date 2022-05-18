@@ -6,18 +6,19 @@ import TypingUsers from './components/TypingUsers.js';
 import { useEffect, useState } from 'react';
 import { socket } from './socket-config.js';
 
+const sysAuthorString = 'SYSTEM'
+
 const App = () => {
 
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')));
   const [messageList, setMessageList] = useState(user !== null ?
-    [{ msgText: <span>Welcome back to the chat <span style={{ color: user.userColor }}>{user.nickname}.</span></span> }] :
-    [{ msgText: 'Please enter your nickname below 📜.' }]);
+    [{ msgText: <span>Welcome back to the chat <span style={{ color: user.userColor }}>{user.nickname}.</span></span>, author: sysAuthorString }] :
+    [{ msgText: 'Please enter your nickname below 📜.', author: sysAuthorString }]);
   const [buttonText, setButtonText] = useState('Submit Nickname');
   const [value, setValue] = useState('');
   const [typingUsers, setTypingUsers] = useState([]);
 
   useEffect(()=>{
-    console.log(user)
     if (user !== null){
       socket.emit('user created', user)
     }
@@ -51,7 +52,7 @@ const App = () => {
           userColor: generateColor(),
         };
         tempUser.guid = tempUser.nickname + tempUser.userColor;
-        appendNewMessage(<span>Welcome to the chat <span style={{ color: tempUser.userColor }}>{tempUser.nickname}.</span></span>);
+        appendNewMessage(<span>Welcome to the chat <span style={{ color: tempUser.userColor }}>{tempUser.nickname}.</span></span>, sysAuthorString);
         socket.emit('user created', tempUser);
         localStorage.setItem('user', JSON.stringify(tempUser));
         setUser({ ...tempUser });
@@ -86,7 +87,7 @@ const App = () => {
           <span style={{color:userColor, fontWeight:'bold'}}>{nickname}: </span>{msg}
         </span>
       )
-      appendNewMessage(span);
+      appendNewMessage(span, { nickname, userColor });
     });
 
     socket.on('user connected', (users) => {
@@ -113,14 +114,14 @@ const App = () => {
         </span>
       );
 
-      appendNewMessage(message);
+      appendNewMessage(message, sysAuthorString);
     });
 
     socket.on('user disconnected', (user) => {
       let message = (
         <span><span style={{ color: user.userColor }}>{user.nickname}</span> has disconnected.</span>
       );
-      appendNewMessage(message);
+      appendNewMessage(message, sysAuthorString);
     });
 
     socket.on('user typing', user => {

@@ -8,7 +8,7 @@ import { Server } from 'socket.io';
 
 const app = express();
 const server = createServer(app);
-const io = new Server(server,{
+const io = new Server(server, {
   cors: {
     origin: 'http://localhost:3000',
     methods: ['GET', 'POST']
@@ -38,16 +38,25 @@ io.on('connection', (socket) => {
       return element.socket === socket.id;
     });
     if (disconnectedUserIndex !== -1) {
-      socket.broadcast.emit('user disconnected', users.splice(disconnectedUserIndex, 1)[0]);
+      socket.broadcast.emit('user disconnected', users[disconnectedUserIndex]);
+      users = users.filter(element =>{
+        return element.socket !== socket.id
+      })
     }
   });
   socket.on('chat message', (msg, { nickname, userColor }) => {
     io.emit('chat message', msg, { nickname, userColor });
   });
   socket.on('user created', (user) => {
-    users.push({...user, socket: socket.id});
-    socket.broadcast.emit('user connected', users);
-  });
+    //react strict mode runs useEffect twice in dev mode. This scans for duplicate before adding to the array.
+    if (users.findIndex(element => {
+      return element.socket === socket.id
+    }) === -1) {
+      users.push({ ...user, socket: socket.id });
+      socket.broadcast.emit('user connected', users);
+    }
+  }
+  );
   socket.on('user typing', (user) => {
     socket.broadcast.emit('user typing', user);
   });
