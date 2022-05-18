@@ -82,12 +82,12 @@ const App = () => {
   //subscribes and unsubscribes socket event listeners
   useEffect(() => {
     socket.on('chat message', (msg, { nickname, userColor, guid }) => {
-      let span =(
-        <span>
-          <span style={{color:userColor, fontWeight:'bold'}}>{nickname}: </span>{msg}
-        </span>
-      )
-      appendNewMessage(span, { nickname, userColor, guid });
+      // let span =(
+      //   <span>
+      //     <span style={{color:userColor, fontWeight:'bold'}}>{nickname}: </span>{msg}
+      //   </span>
+      // )
+      appendNewMessage(msg, { nickname, userColor, guid });
     });
 
     socket.on('user connected', (users) => {
