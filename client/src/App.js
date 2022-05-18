@@ -25,7 +25,7 @@ const App = () => {
   }, [user])
 
   const appendNewMessage = (msgText, author) => {
-    console.log('appending new message', msgText);
+    console.log('appending new message', msgText, author);
     setMessageList((prevState) => {
        return [...prevState, { msgText, author }];
     });
@@ -81,13 +81,13 @@ const App = () => {
 
   //subscribes and unsubscribes socket event listeners
   useEffect(() => {
-    socket.on('chat message', (msg, { nickname, userColor }) => {
+    socket.on('chat message', (msg, { nickname, userColor, guid }) => {
       let span =(
         <span>
           <span style={{color:userColor, fontWeight:'bold'}}>{nickname}: </span>{msg}
         </span>
       )
-      appendNewMessage(span, { nickname, userColor });
+      appendNewMessage(span, { nickname, userColor, guid });
     });
 
     socket.on('user connected', (users) => {

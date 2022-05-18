@@ -44,8 +44,8 @@ io.on('connection', (socket) => {
       })
     }
   });
-  socket.on('chat message', (msg, { nickname, userColor }) => {
-    io.emit('chat message', msg, { nickname, userColor });
+  socket.on('chat message', (msg, user) => {
+    io.emit('chat message', msg, user);
   });
   socket.on('user created', (user) => {
     //react strict mode runs useEffect twice in dev mode. This scans for duplicate before adding to the array.
