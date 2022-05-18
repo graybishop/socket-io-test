@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 
-const Message = ({ msgText, latest }) => {
+const Message = ({ msgText, latest, style }) => {
   //this ref and useEffect are used to enable browser scrollIntoView
   const listEl = useRef();
   useEffect(() => {
@@ -10,7 +10,7 @@ const Message = ({ msgText, latest }) => {
   }, [latest]);
 
   return (
-    <li ref={listEl}>
+    <li ref={listEl} style={style}>
       {msgText}
     </li>
   );
