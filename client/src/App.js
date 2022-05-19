@@ -5,6 +5,7 @@ import TypingUsers from './components/TypingUsers.js';
 
 import { useEffect, useState } from 'react';
 import { socket } from './socket-config.js';
+import { useLocation } from 'react-router-dom'
 
 const sysAuthorString = 'SYSTEM'
 
@@ -17,6 +18,9 @@ const App = () => {
   const [buttonText, setButtonText] = useState('Submit Nickname');
   const [value, setValue] = useState('');
   const [typingUsers, setTypingUsers] = useState([]);
+
+  let location = useLocation()
+  console.log(location)
 
   useEffect(()=>{
     if (user !== null){
