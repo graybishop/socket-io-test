@@ -4,8 +4,9 @@ import path from 'path';
 import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
+import morgan from 'morgan';
 
-
+let logger = morgan('dev')
 const app = express();
 const server = createServer(app);
 const io = new Server(server, {
@@ -22,6 +23,8 @@ const __dirname = dirname(__filename);
 
 //tracks  live users
 let users = [];
+
+app.use(logger)
 
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '../client/build')));

@@ -21,6 +21,14 @@ const App = () => {
 
   let location = useLocation()
   console.log(location)
+  useEffect(()=>{
+    if (location.pathname === '/') {
+      console.log('we need a slug from the server')
+      socket.emit('need room')
+    } else {
+      console.log('we are in a room')
+    }
+  })
 
   useEffect(()=>{
     if (user !== null){
