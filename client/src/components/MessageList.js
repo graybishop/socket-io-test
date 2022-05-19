@@ -15,7 +15,7 @@ const MessageList = (props) => {
         [<Message msgText={element.msgText} key={index} latest={latest} style={systemMsgStyle}/>]
       );
     }
-    if (element.author.guid !== props.messageList[index-1].author.guid) {
+    if (element.author.socket !== props.messageList[index-1].author.socket) {
       const nicknameTitleStyle = {
         color: element.author.userColor,
         fontWeight:'bold',
