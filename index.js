@@ -24,6 +24,11 @@ const __dirname = dirname(__filename);
 
 //tracks  live users
 let users = [];
+const sampleRooms = ['room1', 'room2', 'room3']
+
+const pickFromArray = (array) => {
+  return array[Math.floor(Math.random()*array.length)]
+}
 
 app.use(logger)
 
@@ -38,9 +43,14 @@ app.get('/', (req, res) => {
 
 io.on('connection', (socket) => {
   socket.on('need room', (callback)=>{
+    const room = pickFromArray(sampleRooms)
+    socket.join(room)
     callback({
-      newRoom: 'test-room'
+      newRoom: room
     })
+  })
+  socket.on('joining room',  (slug)=>{
+    socket.join(slug)
   })
   socket.on('disconnect', () => {
     let disconnectedUserIndex = users.findIndex(element => {
@@ -53,8 +63,10 @@ io.on('connection', (socket) => {
       })
     }
   });
-  socket.on('chat message', (msg, user) => {
-    io.emit('chat message', msg, user);
+  socket.on('chat message', (msg, user, room) => {
+    console.log(room)
+    io.to(room).emit('chat message', msg, user)
+    // io.emit('chat message', msg, user);
   });
   socket.on('user created', (user) => {
     //react strict mode runs useEffect twice in dev mode. This scans for duplicate before adding to the array.

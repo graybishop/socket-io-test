@@ -21,6 +21,7 @@ const App = () => {
 
   const location = useLocation()
   const navigate = useNavigate()
+  const room = location.pathname.slice(1)
 
   useEffect(()=>{
     if (location.pathname === '/') {
@@ -30,9 +31,9 @@ const App = () => {
         navigate(`/${response.newRoom}`)
       })
     } else {
-      console.log('we are in a room')
+      socket.emit('joining room', room)
     }
-  }, [location, navigate])
+  }, [location, navigate, room])
 
   useEffect(()=>{
     if (user !== null){
@@ -75,7 +76,7 @@ const App = () => {
         setValue('');
         return;
       } else {
-        socket.emit('chat message', value, user);
+        socket.emit('chat message', value, user, room);
         setValue('');
         return;
       }
