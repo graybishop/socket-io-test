@@ -37,6 +37,11 @@ app.get('/', (req, res) => {
 });
 
 io.on('connection', (socket) => {
+  socket.on('need room', (callback)=>{
+    callback({
+      newRoom: 'test-room'
+    })
+  })
   socket.on('disconnect', () => {
     let disconnectedUserIndex = users.findIndex(element => {
       return element.socket === socket.id;

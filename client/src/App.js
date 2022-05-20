@@ -5,7 +5,7 @@ import TypingUsers from './components/TypingUsers.js';
 
 import { useEffect, useState } from 'react';
 import { socket } from './socket-config.js';
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 const sysAuthorString = 'SYSTEM'
 
@@ -15,21 +15,24 @@ const App = () => {
   const [messageList, setMessageList] = useState(user !== null ?
     [{ msgText: <span>Welcome back to the chat <span style={{ color: user.userColor }}>{user.nickname}.</span></span>, author: sysAuthorString }] :
     [{ msgText: 'Please enter your nickname below 📜.', author: sysAuthorString }]);
-  const [buttonText, setButtonText] = useState('Submit Nickname');
+  const [buttonText, setButtonText] = useState(user === null ? 'Submit Nickname' : 'Send');
   const [value, setValue] = useState('');
   const [typingUsers, setTypingUsers] = useState([]);
 
-  let location = useLocation()
-  console.log(location)
+  const location = useLocation()
+  const navigate = useNavigate()
 
   useEffect(()=>{
     if (location.pathname === '/') {
       console.log('we need a slug from the server')
-      socket.emit('need room')
+      socket.emit('need room', (response)=>{
+        console.log(response)
+        navigate(`/${response.newRoom}`)
+      })
     } else {
       console.log('we are in a room')
     }
-  }, [location])
+  }, [location, navigate])
 
   useEffect(()=>{
     if (user !== null){
@@ -38,7 +41,6 @@ const App = () => {
   }, [user])
 
   const appendNewMessage = (msgText, author) => {
-    console.log('appending new message', msgText, author);
     setMessageList((prevState) => {
        return [...prevState, { msgText, author }];
     });
