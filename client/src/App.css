@@ -54,12 +54,14 @@
   list-style-type: none;
   margin: 0;
   padding: 0;
-  overflow: auto;
+  overflow-y: auto;
   scroll-behavior: smooth;
+  flex-grow: 1;
 }
 
 .messages>li {
   padding: 0.5rem 1rem;
+  word-wrap: break-word;
 }
 
 .messages>li:nth-child(odd) {

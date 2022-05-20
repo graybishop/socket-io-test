@@ -1,6 +1,9 @@
+import {useAutoAnimate} from '@formkit/auto-animate/react'
 import Message from './Message.js';
 
 const MessageList = (props) => {
+  const [parent] = useAutoAnimate()
+  console.log(parent)
   const messages = props.messageList.flatMap((element, index) => {
     const latest = index === props.messageList.length - 1
     const msgBlockStyle = {
@@ -30,7 +33,7 @@ const MessageList = (props) => {
   });
 
   return (
-    <ul className='messages'>
+    <ul className='messages' ref={parent}>
       {messages}
     </ul>
   );
