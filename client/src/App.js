@@ -5,7 +5,7 @@ import TypingUsers from './components/TypingUsers.js';
 
 import { useEffect, useState } from 'react';
 import { socket } from './socket-config.js';
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 
 const sysAuthorString = 'SYSTEM'
 
@@ -21,13 +21,12 @@ const App = () => {
 
   const location = useLocation()
   const navigate = useNavigate()
-  const room = location.pathname.slice(1)
+  const room = useParams().room
 
   useEffect(()=>{
     if (location.pathname === '/') {
       console.log('we need a slug from the server')
       socket.emit('need room', (response)=>{
-        console.log(response)
         navigate(`/${response.newRoom}`)
       })
     } else {
