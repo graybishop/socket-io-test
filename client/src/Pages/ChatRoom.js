@@ -1,15 +1,15 @@
-import './App.css';
-import MessageList from './components/MessageList.js';
-import SubmitButton from './components/SubmitButton.js';
-import TypingUsers from './components/TypingUsers.js';
+import '../App.css';
+import MessageList from '../components/MessageList.js';
+import SubmitButton from '../components/SubmitButton.js';
+import TypingUsers from '../components/TypingUsers.js';
 
 import { useEffect, useState } from 'react';
-import { socket } from './socket-config.js';
+import { socket } from '../socket-config.js';
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 
 const sysAuthorString = 'SYSTEM'
 
-const App = () => {
+const ChatRoom = () => {
 
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')));
   const [messageList, setMessageList] = useState(user !== null ?
@@ -193,4 +193,4 @@ const App = () => {
 
 };
 
-export default App;
+export default ChatRoom;
