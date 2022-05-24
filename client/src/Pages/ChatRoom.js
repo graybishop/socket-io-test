@@ -18,6 +18,7 @@ const ChatRoom = () => {
   const [buttonText, setButtonText] = useState(user === null ? 'Submit Nickname' : 'Send');
   const [value, setValue] = useState('');
   const [typingUsers, setTypingUsers] = useState([]);
+  const [onlineUsers, setOnlineUsers] =  useState([])
 
   const location = useLocation()
   const navigate = useNavigate()
@@ -101,6 +102,7 @@ const ChatRoom = () => {
     });
 
     socket.on('user connected', (users) => {
+      setOnlineUsers([...users])
       let userSection = (
         <span>
           {users.length > 1 ?
